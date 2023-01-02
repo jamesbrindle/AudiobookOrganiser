@@ -37,6 +37,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -50,6 +51,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Business\MetaDataReader.cs" />
+    <Compile Include="Business\Tasks\DeleteEmptyDirectoriesFromLibrary.cs" />
+    <Compile Include="Business\Tasks\MoveFromRenamedFolderToLibraryFolder.cs" />
+    <Compile Include="Business\Tasks\SyncFromOpenAudibleDownloads.cs" />
+    <Compile Include="Business\Tasks\ReorganiseFilesAlreadyInLibrary.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="MediaInfoDLL.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>

@@ -8,5 +8,6 @@
         public string Series { get; set; }
         public string SeriesPart { get; set; }
         public string Year { get; set; }
+        public string Genre { get; set; }
     }
 }

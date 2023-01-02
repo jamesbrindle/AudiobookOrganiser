@@ -45,75 +45,208 @@ namespace AudiobookOrganiser.Business
             var mediaInfo = new MediaInfoLib.MediaInfo();
             mediaInfo.Open(audioFilePath);
 
-            metaData.Author = String.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "author"))?.Replace("  ", " ").Trim();
+            /*
+             * Author
+             */
+
+            metaData.Author = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "author"))?
+                                    .Replace("  ", " ")
+                                    .Trim();
 
             if (string.IsNullOrEmpty(metaData.Author))
-                metaData.Author = String.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Author"))?.Replace("  ", " ").Trim();
+                metaData.Author = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Author"))?
+                                        .Replace("  ", " ")
+                                        .Trim();
 
             if (string.IsNullOrEmpty(metaData.Author))
-                metaData.Author = String.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "performer"))?.Replace("  ", " ").Trim();
+                metaData.Author = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "performer"))?
+                                        .Replace("  ", " ")
+                                        .Trim();
 
             if (string.IsNullOrEmpty(metaData.Author))
-                metaData.Author = String.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Performer"))?.Replace("  ", " ").Trim();
+                metaData.Author = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Performer"))?
+                                        .Replace("  ", " ")
+                                        .Trim();
+            /*
+            * Narrator
+            */
 
-            metaData.Narrator = String.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "narrated_by"))?.Replace("  ", " ").Trim();
+            metaData.Narrator = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "narrated_by"))?
+                                      .Replace("  ", " ")
+                                      .Trim();
 
             if (string.IsNullOrEmpty(metaData.Narrator))
-                metaData.Narrator = String.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Narrated_By"))?.Replace("  ", " ").Trim();
+                metaData.Narrator = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Narrated_By"))?
+                                          .Replace("  ", " ")
+                                          .Trim();
 
             if (string.IsNullOrEmpty(metaData.Narrator))
-                metaData.Narrator = String.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "composer"))?.Replace("  ", " ").Trim();
+                metaData.Narrator = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "composer"))?
+                                          .Replace("  ", " ")
+                                          .Trim();
 
             if (string.IsNullOrEmpty(metaData.Narrator))
-                metaData.Narrator = String.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Composer"))?.Replace("  ", " ").Trim();
+                metaData.Narrator = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Composer"))?
+                                          .Replace("  ", " ")
+                                          .Trim();
 
-            metaData.Title = String.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "album"))?.Replace("Unabridged", "")?.Replace("  ", " ").Trim().Replace("()", "").Trim();
+            /*
+             * Title
+             */
+
+            metaData.Title = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "track_name"))?.Replace("Unabridged", "")?
+                                   .Replace("  ", " ")
+                                   .Replace("()", "")
+                                   .Trim();
 
             if (string.IsNullOrEmpty(metaData.Title))
-                metaData.Title = String.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Album"))?.Replace("Unabridged", "").Replace("  ", " ").Trim().Replace("()", "").Trim();
+                metaData.Title = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Track_Name"))?.Replace("Unabridged", "")?
+                                       .Replace("  ", " ")
+                                       .Replace("()", "")
+                                       .Trim();
 
             if (string.IsNullOrEmpty(metaData.Title))
-                metaData.Title = String.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "title"))?.Replace("Unabridged", "").Replace("  ", " ").Trim().Replace("()", "").Trim();
+                metaData.Title = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "track"))?.Replace("Unabridged", "")?
+                                       .Replace("  ", " ")
+                                       .Replace("()", "")
+                                       .Trim();
 
             if (string.IsNullOrEmpty(metaData.Title))
-                metaData.Title = String.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Title"))?.Replace("Unabridged", "").Replace("  ", " ").Trim().Replace("()", "").Trim();
+                metaData.Title = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Track"))?.Replace("Unabridged", "")?
+                                       .Replace("  ", " ")
+                                       .Replace("()", "")
+                                       .Trim();
 
-            metaData.Year = String.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "year"))?.Replace("  ", " ").Trim();
+            if (string.IsNullOrEmpty(metaData.Title))
+                metaData.Title = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "album"))?.Replace("Unabridged", "")?
+                                       .Replace("  ", " ")
+                                       .Replace("()", "")
+                                       .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Title))
+                metaData.Title = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Album"))?
+                                       .Replace("Unabridged", "")
+                                       .Replace("  ", " ")
+                                       .Replace("()", "")
+                                       .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Title))
+                metaData.Title = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "title"))?
+                                       .Replace("Unabridged", "").Replace("  ", " ")
+                                       .Replace("()", "")
+                                       .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Title))
+                metaData.Title = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Title"))?.Replace("Unabridged", "")
+                                       .Replace("  ", " ")
+                                       .Replace("()", "")
+                                       .Trim();
+
+            /*
+             * Year
+             */
+
+            metaData.Year = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "year"))?
+                                  .Replace("  ", " ")
+                                  .Trim();
 
             if (string.IsNullOrEmpty(metaData.Year))
-                metaData.Year = String.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Year"))?.Replace("  ", " ").Trim();
+                metaData.Year = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Year"))?
+                                      .Replace("  ", " ")
+                                      .Trim();
 
             if (string.IsNullOrEmpty(metaData.Year))
-                metaData.Year = String.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Original_Released_Date"))?.Replace("  ", " ").Trim();
+                metaData.Year = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Original_Released_Date"))?
+                                      .Replace("  ", " ")
+                                      .Trim();
 
             if (string.IsNullOrEmpty(metaData.Year))
-                metaData.Year = String.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Recorded_Date"))?.Replace("  ", " ").Trim();
+                metaData.Year = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Recorded_Date"))?
+                                      .Replace("  ", " ")
+                                      .Trim();
 
             if (string.IsNullOrEmpty(metaData.Year))
-                metaData.Year = String.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Tagged_Date"))?.Replace("  ", " ").Trim();
+                metaData.Year = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Tagged_Date"))?
+                                      .Replace("  ", " ")
+                                      .Trim();
 
-            metaData.Series = String.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "SERIES"))?.Replace("  ", " ").Trim();
-            metaData.SeriesPart = String.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "SERIES-PART"))?.Replace("  ", " ").Trim();
+            /*
+             * Series
+             */
+
+            metaData.Series = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "SERIES"))?
+                                    .Replace("  ", " ")
+                                    .Trim();
+
+            metaData.SeriesPart = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "SERIES-PART"))?
+                                        .Replace("  ", " ")
+                                        .Trim();
+
+            /*
+             * Genre
+             */
+
+            metaData.Genre = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "book_genre"))?
+                                   .Replace("  ", " ")
+                                   .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Genre))
+                metaData.Genre = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Book_Genre"))?
+                                    .Replace("  ", " ")
+                                    .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Genre))
+                metaData.Genre = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "genre"))?
+                                    .Replace("  ", " ")
+                                    .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Genre))
+                metaData.Genre = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Genre"))?
+                                    .Replace("  ", " ")
+                                    .Trim();
 
             try
             {
+                // Fallback
 
                 var tagLibInfo = TagLib.File.Create(audioFilePath);
 
                 if (string.IsNullOrEmpty(metaData.Author))
-                    metaData.Author = String.Join(", ", tagLibInfo.Tag.Performers)?.Replace("  ", " ").Trim();
+                    metaData.Author = string.Join(", ", tagLibInfo.Tag.Performers)?
+                                            .Replace("  ", " ")
+                                            .Trim();
 
                 if (string.IsNullOrEmpty(metaData.Author))
-                    metaData.Author = String.Join(", ", tagLibInfo.Tag.AlbumArtists)?.Replace("  ", " ").Trim();
+                    metaData.Author = string.Join(", ", tagLibInfo.Tag.AlbumArtists)?
+                                            .Replace("  ", " ")
+                                            .Trim();
 
                 if (string.IsNullOrEmpty(metaData.Narrator))
-                    metaData.Narrator = String.Join(", ", tagLibInfo.Tag.Composers)?.Replace("  ", " ").Trim();
+                    metaData.Narrator = string.Join(", ", tagLibInfo.Tag.Composers)?
+                                              .Replace("  ", " ")
+                                              .Trim();
 
                 if (string.IsNullOrEmpty(metaData.Title))
-                    metaData.Title = tagLibInfo.Tag.Title?.Replace("Unabridged", "").Trim().Replace("()", "");
+                    metaData.Title = tagLibInfo.Tag.Title?.Replace("Unabridged", "")
+                                                          .Trim()
+                                                          .Replace("()", "");
 
                 if (string.IsNullOrEmpty(metaData.Year))
                     metaData.Year = tagLibInfo.Tag.Year.ToString();
+
+                if (string.IsNullOrEmpty(metaData.Genre))
+                    metaData.Genre = string.Join(", ", tagLibInfo.Tag.Genres)?
+                                            .Replace("  ", " ")
+                                            .Trim();
+
+                // Cleaning up
+
+                try
+                {
+                    if (!string.IsNullOrEmpty(metaData.Title) && metaData.Title.ToLower().Contains("book"))
+                        metaData.Title = Regex.Replace(metaData.Title, @", Book \d+", "");
+                }
+                catch { }
 
                 try
                 {
@@ -136,7 +269,6 @@ namespace AudiobookOrganiser.Business
                 if (!string.IsNullOrEmpty(metaData.Author) && metaData.Author.Contains(","))
                 {
                     string[] authorParts = metaData.Author.Split(',');
-
                     if (authorParts.Length > 0)
                         metaData.Author = authorParts[0].Trim();
                 }
@@ -144,7 +276,6 @@ namespace AudiobookOrganiser.Business
                 if (!string.IsNullOrEmpty(metaData.Narrator) && metaData.Narrator.Contains(","))
                 {
                     string[] narratorParts = metaData.Narrator.Split(',');
-
                     if (narratorParts.Length > 0)
                         metaData.Narrator = narratorParts[0].Trim();
                 }
@@ -155,7 +286,7 @@ namespace AudiobookOrganiser.Business
 
         private static MetaData GetMetaDataByParsingFilePath(MetaData metaData, string audioFilePath)
         {
-            string[] directories = audioFilePath.Replace(Program.LibraryRoot, "").Split(Path.DirectorySeparatorChar);
+            string[] directories = audioFilePath.Replace(Program.CurrentLibraryRoot, "").Split(Path.DirectorySeparatorChar);
 
             if (string.IsNullOrEmpty(metaData.Author))
                 metaData.Author = directories[0];
@@ -172,7 +303,11 @@ namespace AudiobookOrganiser.Business
                         int nIndexEnd = directory.LastIndexOf(")");
 
                         if (nIndexStart != -1 && nIndexEnd != -1)
-                            narrator = directory.Substring(nIndexStart, nIndexEnd - nIndexStart).Replace("(Narrated - ", "").Replace(")", "").Trim().Replace("  ", " ");
+                            narrator = directory.Substring(nIndexStart, nIndexEnd - nIndexStart)
+                                                .Replace("(Narrated - ", "")
+                                                .Replace(")", "")
+                                                .Trim()
+                                                .Replace("  ", " ");
 
                         if (!string.IsNullOrEmpty(narrator))
                             break;
@@ -189,7 +324,11 @@ namespace AudiobookOrganiser.Business
                             int nIndexEnd = directory.LastIndexOf(")");
 
                             if (nIndexStart != -1 && nIndexEnd != -1)
-                                narrator = directory.Substring(nIndexStart, nIndexEnd - nIndexStart).Replace("(Narrated By ", "").Replace(")", "").Trim().Replace("  ", " ");
+                                narrator = directory.Substring(nIndexStart, nIndexEnd - nIndexStart)
+                                                    .Replace("(Narrated By ", "")
+                                                    .Replace(")", "")
+                                                    .Trim()
+                                                    .Replace("  ", " ");
 
                             if (!string.IsNullOrEmpty(narrator))
                                 break;
@@ -207,7 +346,10 @@ namespace AudiobookOrganiser.Business
                             int nIndexEnd = directory.LastIndexOf(")");
 
                             if (nIndexStart != -1 && nIndexEnd != -1)
-                                narrator = directory.Substring(nIndexStart, nIndexEnd - nIndexStart).Replace("(Narrated by", "").Replace(")", "").Trim().Replace("  ", " ");
+                                narrator = directory.Substring(nIndexStart, nIndexEnd - nIndexStart).Replace("(Narrated by", "")
+                                                    .Replace(")", "")
+                                                    .Trim()
+                                                    .Replace("  ", " ");
 
                             if (!string.IsNullOrEmpty(narrator))
                                 break;
@@ -225,7 +367,11 @@ namespace AudiobookOrganiser.Business
                             int nIndexEnd = directory.LastIndexOf(")");
 
                             if (nIndexStart != -1 && nIndexEnd != -1)
-                                narrator = directory.Substring(nIndexStart, nIndexEnd - nIndexStart).Replace("(Narrated by - ", "").Replace(")", "").Trim().Replace("  ", " ");
+                                narrator = directory.Substring(nIndexStart, nIndexEnd - nIndexStart)
+                                                    .Replace("(Narrated by - ", "")
+                                                    .Replace(")", "")
+                                                    .Trim()
+                                                    .Replace("  ", " ");
 
                             if (!string.IsNullOrEmpty(narrator))
                                 break;
@@ -243,7 +389,11 @@ namespace AudiobookOrganiser.Business
                             int nIndexEnd = directory.LastIndexOf(")");
 
                             if (nIndexStart != -1 && nIndexEnd != -1)
-                                narrator = directory.Substring(nIndexStart, nIndexEnd - nIndexStart).Replace("(Narrated By -", "").Replace(")", "").Trim().Replace("  ", " ");
+                                narrator = directory.Substring(nIndexStart, nIndexEnd - nIndexStart)
+                                                    .Replace("(Narrated By -", "")
+                                                    .Replace(")", "")
+                                                    .Trim()
+                                                    .Replace("  ", " ");
 
                             if (!string.IsNullOrEmpty(narrator))
                                 break;
@@ -258,9 +408,11 @@ namespace AudiobookOrganiser.Business
                         if (directory.ToLower().Contains("narrated"))
                         {
                             int nIndexStart = directory.IndexOf("Narrated By ");
-
                             if (nIndexStart != -1)
-                                narrator = directory.Substring(nIndexStart).Replace("Narrated By", "").Trim().Replace("  ", " ");
+                                narrator = directory.Substring(nIndexStart)
+                                                    .Replace("Narrated By", "")
+                                                    .Trim()
+                                                    .Replace("  ", " ");
 
                             if (!string.IsNullOrEmpty(narrator))
                                 break;
@@ -275,28 +427,25 @@ namespace AudiobookOrganiser.Business
                         if (directory.ToLower().Contains("narrated"))
                         {
                             int nIndexStart = directory.IndexOf("Narrated by ");
-
                             if (nIndexStart != -1)
-                                narrator = directory.Substring(nIndexStart).Replace("Narrated by", "").Trim().Replace("  ", " ");
+                                narrator = directory.Substring(nIndexStart)
+                                                    .Replace("Narrated by", "")
+                                                    .Trim()
+                                                    .Replace("  ", " ");
 
                             if (!string.IsNullOrEmpty(narrator))
                                 break;
                         }
                     }
                 }
-
-                if (!string.IsNullOrEmpty(narrator))
-                    metaData.Narrator = narrator;
             }
 
             if (string.IsNullOrEmpty(metaData.Year))
             {
                 var matches = Regex.Matches(audioFilePath, @"\d+");
-
                 foreach (Match match in matches)
                 {
                     bool isNumeric = int.TryParse(match.Value, out int year);
-
                     if (isNumeric && year > 1900 && year < 2200)
                         metaData.Year = year.ToString();
 
