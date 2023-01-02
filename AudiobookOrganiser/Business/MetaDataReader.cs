@@ -243,8 +243,34 @@ namespace AudiobookOrganiser.Business
 
                 try
                 {
-                    if (!string.IsNullOrEmpty(metaData.Title) && metaData.Title.ToLower().Contains("book"))
-                        metaData.Title = Regex.Replace(metaData.Title, @", Book \d+", "");
+                    if (!string.IsNullOrEmpty(metaData.Title) &&
+                        metaData.Title.ToLower().Contains("book"))
+                    {
+                        metaData.Title = Regex.Replace(metaData.Title, @", Book \d+", "")
+                                              .Trim();
+                    }
+                }
+                catch { }
+
+                try
+                {
+                    if (!string.IsNullOrEmpty(metaData.Title) &&
+                        metaData.Title.Contains($" (Narrated by {metaData.Narrator ?? ""})"))
+                    {
+                        metaData.Title = metaData.Title.Replace($" (Narrated by {metaData.Narrator ?? ""})", "")
+                                                       .Trim();
+                    }
+                }
+                catch { }
+
+                try
+                {
+                    if (!string.IsNullOrEmpty(metaData.Title) &&
+                        metaData.Title.Contains($" (Narrated By {metaData.Narrator ?? ""})"))
+                    {
+                        metaData.Title = metaData.Title.Replace($" (Narrated By {metaData.Narrator ?? ""})", "")
+                                                       .Trim();
+                    }
                 }
                 catch { }
 
@@ -306,8 +332,8 @@ namespace AudiobookOrganiser.Business
                             narrator = directory.Substring(nIndexStart, nIndexEnd - nIndexStart)
                                                 .Replace("(Narrated - ", "")
                                                 .Replace(")", "")
-                                                .Trim()
-                                                .Replace("  ", " ");
+                                                .Replace("  ", " ")
+                                                .Trim();
 
                         if (!string.IsNullOrEmpty(narrator))
                             break;
@@ -327,8 +353,8 @@ namespace AudiobookOrganiser.Business
                                 narrator = directory.Substring(nIndexStart, nIndexEnd - nIndexStart)
                                                     .Replace("(Narrated By ", "")
                                                     .Replace(")", "")
-                                                    .Trim()
-                                                    .Replace("  ", " ");
+                                                    .Replace("  ", " ")
+                                                    .Trim();
 
                             if (!string.IsNullOrEmpty(narrator))
                                 break;
@@ -348,8 +374,8 @@ namespace AudiobookOrganiser.Business
                             if (nIndexStart != -1 && nIndexEnd != -1)
                                 narrator = directory.Substring(nIndexStart, nIndexEnd - nIndexStart).Replace("(Narrated by", "")
                                                     .Replace(")", "")
-                                                    .Trim()
-                                                    .Replace("  ", " ");
+                                                    .Replace("  ", " ")
+                                                    .Trim();
 
                             if (!string.IsNullOrEmpty(narrator))
                                 break;
@@ -370,8 +396,8 @@ namespace AudiobookOrganiser.Business
                                 narrator = directory.Substring(nIndexStart, nIndexEnd - nIndexStart)
                                                     .Replace("(Narrated by - ", "")
                                                     .Replace(")", "")
-                                                    .Trim()
-                                                    .Replace("  ", " ");
+                                                    .Replace("  ", " ")
+                                                    .Trim();
 
                             if (!string.IsNullOrEmpty(narrator))
                                 break;
@@ -392,8 +418,8 @@ namespace AudiobookOrganiser.Business
                                 narrator = directory.Substring(nIndexStart, nIndexEnd - nIndexStart)
                                                     .Replace("(Narrated By -", "")
                                                     .Replace(")", "")
-                                                    .Trim()
-                                                    .Replace("  ", " ");
+                                                    .Replace("  ", " ")
+                                                    .Trim();
 
                             if (!string.IsNullOrEmpty(narrator))
                                 break;
@@ -411,8 +437,8 @@ namespace AudiobookOrganiser.Business
                             if (nIndexStart != -1)
                                 narrator = directory.Substring(nIndexStart)
                                                     .Replace("Narrated By", "")
-                                                    .Trim()
-                                                    .Replace("  ", " ");
+                                                    .Replace("  ", " ")
+                                                    .Trim();
 
                             if (!string.IsNullOrEmpty(narrator))
                                 break;
@@ -430,8 +456,8 @@ namespace AudiobookOrganiser.Business
                             if (nIndexStart != -1)
                                 narrator = directory.Substring(nIndexStart)
                                                     .Replace("Narrated by", "")
-                                                    .Trim()
-                                                    .Replace("  ", " ");
+                                                    .Replace("  ", " ")
+                                                    .Trim();
 
                             if (!string.IsNullOrEmpty(narrator))
                                 break;
