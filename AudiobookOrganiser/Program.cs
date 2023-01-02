@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace AudiobookOrganiser
 {
@@ -36,6 +37,12 @@ namespace AudiobookOrganiser
                 DeleteEmptyDirectoriesFromLibrary();
                 MoveFromRenamedFolderToLibraryFolder();
             }
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Out.WriteLine("\n\nDONE!");
+            Console.ForegroundColor = ConsoleColor.White;
+
+            Thread.Sleep(3000);
         }
 
         private static void RenameFilesAlreadyInLibrary()
@@ -147,7 +154,7 @@ namespace AudiobookOrganiser
         private static void DeleteEmptyDirectoriesFromLibrary()
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.Out.WriteLine("\n\nDeleting leftover empty directories from library...\n\n");
+            Console.Out.WriteLine("\n\nDeleting leftover empty directories from library...");
             Console.ForegroundColor = ConsoleColor.White;
 
             var directories = Directory.GetDirectories(LibraryRoot, "*.*", SearchOption.TopDirectoryOnly);
@@ -179,7 +186,16 @@ namespace AudiobookOrganiser
             {
                 Console.Out.WriteLine(Path.GetFileNameWithoutExtension(new DirectoryInfo(directory).Name));
 
-                Directory.Move(directory, Path.Combine(LibraryRoot, new DirectoryInfo(directory).Name));
+                try
+                {
+                    Directory.Move(directory, Path.Combine(LibraryRoot, new DirectoryInfo(directory).Name));
+                }
+                catch
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Out.WriteLine("Could not move file: " + directory);
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
             }
 
             var renamedDirectories = Directory.GetDirectories(OutputRootPath, "*.*", SearchOption.TopDirectoryOnly);
