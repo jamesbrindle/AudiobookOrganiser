@@ -1,4 +1,6 @@
-﻿namespace System
+﻿using System.Linq;
+
+namespace System
 {
     internal static class Extensions
     {
@@ -19,16 +21,12 @@
             }
         }
 
-        internal static bool StringContainsIn(this string inputStr, params string[] containsList)
+        internal static bool In<T>(this T item, params T[] items)
         {
-            if (containsList == null)
+            if (items == null)
                 throw new ArgumentNullException("items");
 
-            for (int i = 0; i < containsList.Length; i++)
-                if (inputStr.ToLower().Contains(containsList[i].ToLower()))
-                    return true;
-
-            return false;
+            return items.Contains(item);
         }
     }
 }

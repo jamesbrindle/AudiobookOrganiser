@@ -41,7 +41,7 @@ namespace AudiobookOrganiser
         internal static string OpenAudibleDownloadsFolderMp3Path { get; set; }
             = ConfigurationManager.AppSettings["OpenAudibleDownloadsFolderMp3Path"].Trim();
         internal static bool SyncFromOpenAudibleDownloadsFolder { get; set; }
-            = ConfigurationManager.AppSettings["SyncFromOpenAudibleDownloadsFolder"].Trim().StringContainsIn("yes", "true");
+            = ConfigurationManager.AppSettings["SyncFromOpenAudibleDownloadsFolder"].Trim().In("yes", "true");
         internal static string OutputDirectoryName { get; set; }
             = ConfigurationManager.AppSettings["OutputDirectoryName"].Trim();
     }
