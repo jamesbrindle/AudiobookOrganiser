@@ -28,5 +28,17 @@ namespace System
 
             return items.Contains(item);
         }
+
+        internal static bool StringContainsIn(this string inputStr, params string[] containsList)
+        {
+            if (containsList == null)
+                throw new ArgumentNullException("items");
+
+            for (int i = 0; i < containsList.Length; i++)
+                if (inputStr.ToLower().Contains(containsList[i].ToLower()))
+                    return true;
+
+            return false;
+        }
     }
 }

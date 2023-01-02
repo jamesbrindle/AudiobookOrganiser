@@ -19,7 +19,7 @@ namespace AudiobookOrganiser.Business.Tasks
             var audioFiles = Directory.GetFiles(Program.CurrentLibraryRoot, "*.*", SearchOption.AllDirectories);
             foreach (var audioFilePath in audioFiles.Where(a => !a.ToLower().Contains(Program.OutputDirectoryName)))
             {
-                if (audioFilePath.In(".mp3", ".m4a", ".m4b"))
+                if (Path.GetExtension(audioFilePath).ToLower().In(".mp3", ".m4a", ".m4b"))
                 {
                     try
                     {

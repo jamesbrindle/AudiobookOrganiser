@@ -20,7 +20,7 @@ namespace AudiobookOrganiser.Business.Tasks
 
         private static void PerformSyncOnFile(string audioFilePath)
         {
-            if (audioFilePath.In(".mp3", ".m4a", ".m4b"))
+            if (Path.GetExtension(audioFilePath).ToLower().In(".mp3", ".m4a", ".m4b"))
             {
                 try
                 {
@@ -120,17 +120,17 @@ namespace AudiobookOrganiser.Business.Tasks
             if (string.IsNullOrWhiteSpace(metaData.Genre))
                 return Program.LibraryRootPaths.Where(l => l == "Fiction").FirstOrDefault();
 
-            if (metaData.Genre.In(
+            if (metaData.Genre.StringContainsIn(
                 "comedy",
                 "stand-up",
                 "stand up",
                 "humour"))
 
             {
-                return Program.LibraryRootPaths.Where(l => l.In("Comedy")).FirstOrDefault();
+                return Program.LibraryRootPaths.Where(l => l.StringContainsIn("Comedy")).FirstOrDefault();
             }
 
-            else if (metaData.Genre.In(
+            else if (metaData.Genre.StringContainsIn(
                 "fiction",
                 "mystery",
                 "triller",
@@ -143,7 +143,7 @@ namespace AudiobookOrganiser.Business.Tasks
                 return Program.LibraryRootPaths.Where(l => l.Contains("\\Fiction")).FirstOrDefault();
             }
 
-            return Program.LibraryRootPaths.Where(l => l.In("Non-Fiction")).FirstOrDefault();
+            return Program.LibraryRootPaths.Where(l => l.StringContainsIn("Non-Fiction")).FirstOrDefault();
         }
     }
 }
