@@ -50,11 +50,6 @@ namespace AudiobookOrganiser.Business.Tasks
                                             "(Narrated - " + metaData.Narrator + ")")
                                     + Path.GetExtension(audioFilePath));
 
-                            if (newFilename.Contains("Dick Hill"))
-                            {
-                                Console.WriteLine("break");
-                            }
-
                             if (newFilename.Length > 255)
                             {
                                 metaData = MetaDataReader.GetMetaData(audioFilePath, true, true, libraryRootPath);
