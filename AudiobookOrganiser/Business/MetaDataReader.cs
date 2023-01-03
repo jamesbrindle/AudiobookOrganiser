@@ -10,14 +10,14 @@ namespace AudiobookOrganiser.Business
     {
         static readonly char[] _invalidFileNameChars = Path.GetInvalidFileNameChars();
 
-        public static MetaData GetMetaData(string audioFile, bool tryParseMetaFromPath, bool small)
+        public static MetaData GetMetaData(string audioFile, bool tryParseMetaFromPath, bool small, string libraryRootPath = null)
         {
             var metaData = new MetaData();
 
             metaData = GetMetaDataByTags(metaData, audioFile, small);
 
-            if (tryParseMetaFromPath)
-                metaData = GetMetaDataByParsingFilePath(metaData, audioFile);
+            if (tryParseMetaFromPath && !string.IsNullOrEmpty(libraryRootPath))
+                metaData = GetMetaDataByParsingFilePath(metaData, libraryRootPath, audioFile);
 
             if (!string.IsNullOrEmpty(metaData.Author))
                 metaData.Author = new string(metaData.Author.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
@@ -311,9 +311,9 @@ namespace AudiobookOrganiser.Business
             return metaData;
         }
 
-        private static MetaData GetMetaDataByParsingFilePath(MetaData metaData, string audioFilePath)
+        private static MetaData GetMetaDataByParsingFilePath(MetaData metaData, string libraryRootPath, string audioFilePath)
         {
-            string[] directories = audioFilePath.Replace(Program.CurrentLibraryRoot, "").Split(Path.DirectorySeparatorChar);
+            string[] directories = audioFilePath.Replace(libraryRootPath, "").Split(Path.DirectorySeparatorChar);
 
             if (string.IsNullOrEmpty(metaData.Author))
                 metaData.Author = directories[0];

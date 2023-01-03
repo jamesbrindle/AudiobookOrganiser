@@ -6,7 +6,7 @@ namespace AudiobookOrganiser.Business.Tasks
 {
     internal class DeleteEmptyDirectoriesFromLibrary
     {
-        internal static void Run()
+        internal static void Run(string libraryPath)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.Out.WriteLine("\n\nDeleting leftover empty directories from library...");
@@ -14,7 +14,7 @@ namespace AudiobookOrganiser.Business.Tasks
 
             ConsoleEx.WriteColouredLine(ConsoleColor.Yellow, "\n\nDeleting leftover empty directories from library...");
 
-            var directories = Directory.GetDirectories(Program.CurrentLibraryRoot, "*.*", SearchOption.TopDirectoryOnly);
+            var directories = Directory.GetDirectories(libraryPath, "*.*", SearchOption.TopDirectoryOnly);
             foreach (var directory in directories)
             {
                 var files = Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories);

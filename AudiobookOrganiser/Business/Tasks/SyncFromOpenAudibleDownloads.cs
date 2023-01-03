@@ -13,7 +13,6 @@ namespace AudiobookOrganiser.Business.Tasks
             ConsoleEx.WriteColouredLine(ConsoleColor.Yellow, "\nSyncing from OpenAudibleDownloads...\n\n");
 
             var mp3AudioFiles = Directory.GetFiles(Program.OpenAudibleDownloadsFolderMp3Path, "*.*", SearchOption.AllDirectories);
-
             foreach (var audioFilePath in mp3AudioFiles)
                 PerformSyncOnFile(audioFilePath);
         }
@@ -24,7 +23,7 @@ namespace AudiobookOrganiser.Business.Tasks
             {
                 try
                 {
-                    var metaData = MetaDataReader.GetMetaData(audioFilePath, true, false);
+                    var metaData = MetaDataReader.GetMetaData(audioFilePath, false, false);
 
                     if (!string.IsNullOrEmpty(metaData.Author) && !string.IsNullOrEmpty(metaData.Title))
                     {

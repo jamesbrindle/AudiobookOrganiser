@@ -7,28 +7,28 @@ namespace AudiobookOrganiser.Business.Tasks
 {
     internal class ReorganiseFilesAlreadyInLibrary
     {
-        internal static void Run()
+        internal static void Run(string libraryRootPath)
         {
             ConsoleEx.WriteColouredLine(ConsoleColor.Yellow, "Renaming files already in library...\n\n");
 
-            Program.OutputDirectoryName = Path.Combine(Program.CurrentLibraryRoot, Program.OutputDirectoryName);
+            string outputDirectory = Path.Combine(libraryRootPath, Program.OutputDirectoryName);
 
-            if (!File.Exists(Program.OutputDirectoryName))
-                Directory.CreateDirectory(Program.OutputDirectoryName);
+            if (!File.Exists(outputDirectory))
+                Directory.CreateDirectory(outputDirectory);
 
-            var audioFiles = Directory.GetFiles(Program.CurrentLibraryRoot, "*.*", SearchOption.AllDirectories);
-            foreach (var audioFilePath in audioFiles.Where(a => !a.ToLower().Contains(Program.OutputDirectoryName)))
+            var audioFiles = Directory.GetFiles(libraryRootPath, "*.*", SearchOption.AllDirectories);
+            foreach (var audioFilePath in audioFiles.Where(a => !a.ToLower().Contains(outputDirectory)))
             {
                 if (Path.GetExtension(audioFilePath).ToLower().In(".mp3", ".m4a", ".m4b"))
                 {
                     try
                     {
-                        var metaData = MetaDataReader.GetMetaData(audioFilePath, true, false);
+                        var metaData = MetaDataReader.GetMetaData(audioFilePath, true, false, libraryRootPath);
 
                         if (!string.IsNullOrEmpty(metaData.Author) && !string.IsNullOrEmpty(metaData.Title))
                         {
                             string newFilename = Path.Combine(
-                                Program.OutputDirectoryName,
+                                outputDirectory,
                                 metaData.Author,
                                 metaData.Series,
                                 (string.IsNullOrEmpty(metaData.SeriesPart)
@@ -50,12 +50,17 @@ namespace AudiobookOrganiser.Business.Tasks
                                             "(Narrated - " + metaData.Narrator + ")")
                                     + Path.GetExtension(audioFilePath));
 
+                            if (newFilename.Contains("Dick Hill"))
+                            {
+                                Console.WriteLine("break");
+                            }
+
                             if (newFilename.Length > 255)
                             {
-                                metaData = MetaDataReader.GetMetaData(audioFilePath, true, true);
+                                metaData = MetaDataReader.GetMetaData(audioFilePath, true, true, libraryRootPath);
 
                                 newFilename = Path.Combine(
-                                    Program.OutputDirectoryName,
+                                    outputDirectory,
                                     metaData.Author,
                                     metaData.Series,
                                     (string.IsNullOrEmpty(metaData.SeriesPart)

@@ -6,11 +6,13 @@ namespace AudiobookOrganiser.Business.Tasks
 {
     internal class MoveFromRenamedFolderToLibraryFolder
     {
-        internal static void Run()
+        internal static void Run(string libraryPath)
         {
             ConsoleEx.WriteColouredLine(ConsoleColor.Yellow, "\n\nMoving from renamed temp folder to library...\n\n");
 
-            var directories = Directory.GetDirectories(Program.OutputDirectoryName, "*.*", SearchOption.TopDirectoryOnly);
+            string outputDirectory = Path.Combine(libraryPath, Program.OutputDirectoryName);
+
+            var directories = Directory.GetDirectories(outputDirectory, "*.*", SearchOption.TopDirectoryOnly);
             foreach (var directory in directories)
             {
                 Console.Out.WriteLine(Path.GetFileNameWithoutExtension(new DirectoryInfo(directory).Name));
@@ -19,7 +21,7 @@ namespace AudiobookOrganiser.Business.Tasks
                 {
                     Directory.Move(
                         directory,
-                        Path.Combine(Program.CurrentLibraryRoot, new DirectoryInfo(directory).Name));
+                        Path.Combine(libraryPath, new DirectoryInfo(directory).Name));
                 }
                 catch
                 {
@@ -27,7 +29,7 @@ namespace AudiobookOrganiser.Business.Tasks
                 }
             }
 
-            var renamedDirectories = Directory.GetDirectories(Program.OutputDirectoryName, "*.*", SearchOption.TopDirectoryOnly);
+            var renamedDirectories = Directory.GetDirectories(outputDirectory, "*.*", SearchOption.TopDirectoryOnly);
             foreach (var directory in renamedDirectories)
             {
                 var files = Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories);
@@ -42,12 +44,12 @@ namespace AudiobookOrganiser.Business.Tasks
                 }
             }
 
-            var anyFilesInRenamed = Directory.GetFiles(Program.OutputDirectoryName, "*.*", SearchOption.AllDirectories);
+            var anyFilesInRenamed = Directory.GetFiles(outputDirectory, "*.*", SearchOption.AllDirectories);
             if (anyFilesInRenamed.Length == 0)
             {
                 try
                 {
-                    Directory.Delete(Program.OutputDirectoryName, true);
+                    Directory.Delete(outputDirectory, true);
                 }
                 catch { }
             }

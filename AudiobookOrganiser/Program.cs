@@ -16,13 +16,11 @@ namespace AudiobookOrganiser
 
             foreach (var library in LibraryRootPaths)
             {
-                CurrentLibraryRoot = library;
-
                 ConsoleEx.WriteColouredLine(ConsoleColor.Cyan, $"\n\nLIBRARY {library}\n\n");
 
-                ReorganiseFilesAlreadyInLibrary.Run();
-                DeleteEmptyDirectoriesFromLibrary.Run();
-                MoveFromRenamedFolderToLibraryFolder.Run();               
+                ReorganiseFilesAlreadyInLibrary.Run(library);
+                DeleteEmptyDirectoriesFromLibrary.Run(library);
+                MoveFromRenamedFolderToLibraryFolder.Run(library);               
             }
 
             SyncFromOpenAudibleDownloads.Run();
@@ -37,7 +35,6 @@ namespace AudiobookOrganiser
 
         internal static string[] LibraryRootPaths { get; set; }
             = ConfigurationManager.AppSettings["LibraryRootPaths"].Trim().Split(';');
-        internal static string CurrentLibraryRoot { get; set; } = null;
         internal static string OpenAudibleDownloadsFolderMp3Path { get; set; }
             = ConfigurationManager.AppSettings["OpenAudibleDownloadsFolderMp3Path"].Trim();
         internal static bool SyncFromOpenAudibleDownloadsFolder { get; set; }
