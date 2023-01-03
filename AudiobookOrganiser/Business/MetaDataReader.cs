@@ -238,57 +238,58 @@ namespace AudiobookOrganiser.Business
                     metaData.Genre = string.Join(", ", tagLibInfo.Tag.Genres)?
                                             .Replace("  ", " ")
                                             .Trim();
+               
+            }
+            catch { }
 
-                // Cleaning up
+            // Cleaning up
 
-                try
+            try
+            {
+                if (!string.IsNullOrEmpty(metaData.Title) &&
+                    metaData.Title.ToLower().Contains("book"))
                 {
-                    if (!string.IsNullOrEmpty(metaData.Title) &&
-                        metaData.Title.ToLower().Contains("book"))
-                    {
-                        metaData.Title = Regex.Replace(metaData.Title, @", Book \d+", "")
-                                              .Trim();
-                    }
-                }
-                catch { }
-
-                try
-                {
-                    if (!string.IsNullOrEmpty(metaData.Title) &&
-                        metaData.Title.Contains($" (Narrated by {metaData.Narrator ?? ""})"))
-                    {
-                        metaData.Title = metaData.Title.Replace($" (Narrated by {metaData.Narrator ?? ""})", "")
-                                                       .Trim();
-                    }
-                }
-                catch { }
-
-                try
-                {
-                    if (!string.IsNullOrEmpty(metaData.Title) &&
-                        metaData.Title.Contains($" (Narrated By {metaData.Narrator ?? ""})"))
-                    {
-                        metaData.Title = metaData.Title.Replace($" (Narrated By {metaData.Narrator ?? ""})", "")
-                                                       .Trim();
-                    }
-                }
-                catch { }
-
-                try
-                {
-                    if (!string.IsNullOrEmpty(metaData.Year))
-                        if (metaData.Year.Contains("-") || metaData.Year.Contains("/"))
-                            metaData.Year = DateTime.Parse(metaData.Year.Replace("UTC ", "")).Year.ToString();
-                }
-                catch { }
-
-                if (!string.IsNullOrEmpty(metaData.Year))
-                {
-                    if (metaData.Year == "1" || metaData.Year == "0")
-                        metaData.Year = null;
+                    metaData.Title = Regex.Replace(metaData.Title, @", Book \d+", "")
+                                          .Trim();
                 }
             }
             catch { }
+
+            try
+            {
+                if (!string.IsNullOrEmpty(metaData.Title) &&
+                    metaData.Title.Contains($" (Narrated by {metaData.Narrator ?? ""})"))
+                {
+                    metaData.Title = metaData.Title.Replace($" (Narrated by {metaData.Narrator ?? ""})", "")
+                                                   .Trim();
+                }
+            }
+            catch { }
+
+            try
+            {
+                if (!string.IsNullOrEmpty(metaData.Title) &&
+                    metaData.Title.Contains($" (Narrated By {metaData.Narrator ?? ""})"))
+                {
+                    metaData.Title = metaData.Title.Replace($" (Narrated By {metaData.Narrator ?? ""})", "")
+                                                   .Trim();
+                }
+            }
+            catch { }
+
+            try
+            {
+                if (!string.IsNullOrEmpty(metaData.Year))
+                    if (metaData.Year.Contains("-") || metaData.Year.Contains("/"))
+                        metaData.Year = DateTime.Parse(metaData.Year.Replace("UTC ", "")).Year.ToString();
+            }
+            catch { }
+
+            if (!string.IsNullOrEmpty(metaData.Year))
+            {
+                if (metaData.Year == "1" || metaData.Year == "0")
+                    metaData.Year = null;
+            }
 
             if (small)
             {
