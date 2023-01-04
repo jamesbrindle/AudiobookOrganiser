@@ -67,6 +67,16 @@ namespace AudiobookOrganiser.Business
                 metaData.Author = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Performer"))?
                                         .Replace("  ", " ")
                                         .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Author))
+                metaData.Author = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Album_Performer"))?
+                                        .Replace("  ", " ")
+                                        .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Author))
+                metaData.Author = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "album_Performer"))?
+                                        .Replace("  ", " ")
+                                        .Trim();
             /*
             * Narrator
             */
@@ -87,6 +97,16 @@ namespace AudiobookOrganiser.Business
 
             if (string.IsNullOrEmpty(metaData.Narrator))
                 metaData.Narrator = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Composer"))?
+                                          .Replace("  ", " ")
+                                          .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Narrator))
+                metaData.Narrator = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "nrt"))?
+                                          .Replace("  ", " ")
+                                          .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Narrator))
+                metaData.Narrator = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "NRT"))?
                                           .Replace("  ", " ")
                                           .Trim();
 
