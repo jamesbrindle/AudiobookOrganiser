@@ -9,5 +9,6 @@
         public string SeriesPart { get; set; }
         public string Year { get; set; }
         public string Genre { get; set; }
+        public string Asin { get; set; }
     }
 }

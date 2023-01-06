@@ -36,9 +36,21 @@
     <ApplicationIcon>favicon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ATL, Version=4.18.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\z440.atl.core.4.18.0\lib\net48\ATL.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -48,17 +60,95 @@
     <Reference Include="TagLibSharp, Version=2.3.0.0, Culture=neutral, PublicKeyToken=db62eba44689b5b0, processorArchitecture=MSIL">
       <HintPath>..\packages\TagLibSharp.2.3.0\lib\net462\TagLibSharp.dll</HintPath>
     </Reference>
+    <Reference Include="Ude.NetStandard, Version=1.0.2.0, Culture=neutral, PublicKeyToken=103cb45fc06c90e4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ude.NetStandard.1.2.0\lib\net45\Ude.NetStandard.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Business\MetaDataReader.cs" />
     <Compile Include="Business\Tasks\DeleteEmptyDirectoriesFromLibrary.cs" />
     <Compile Include="Business\Tasks\MoveFromRenamedFolderToLibraryFolder.cs" />
+    <Compile Include="Business\Tasks\SyncFromAudibleCli.cs" />
     <Compile Include="Business\Tasks\SyncFromOpenAudibleDownloads.cs" />
     <Compile Include="Business\Tasks\ReorganiseFilesAlreadyInLibrary.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="Helpers\FfMpeg\CombineOptions.cs" />
+    <Compile Include="Helpers\FfMpeg\ConcatenationOptions.cs" />
+    <Compile Include="Helpers\FfMpeg\ConversionOptions.cs" />
+    <Compile Include="Helpers\FfMpeg\Engine.cs" />
+    <Compile Include="Helpers\FfMpeg\Enums\AudioSampleRate.cs" />
+    <Compile Include="Helpers\FfMpeg\Enums\Codec.cs" />
+    <Compile Include="Helpers\FfMpeg\Enums\ConcatenationType.cs" />
+    <Compile Include="Helpers\FfMpeg\Enums\CropRectangle.cs" />
+    <Compile Include="Helpers\FfMpeg\Enums\Format.cs" />
+    <Compile Include="Helpers\FfMpeg\Enums\HWAccel.cs" />
+    <Compile Include="Helpers\FfMpeg\Enums\Target.cs" />
+    <Compile Include="Helpers\FfMpeg\Enums\TargetStandard.cs" />
+    <Compile Include="Helpers\FfMpeg\Enums\VideoAspectRatio.cs" />
+    <Compile Include="Helpers\FfMpeg\Enums\VideoCodecPreset.cs" />
+    <Compile Include="Helpers\FfMpeg\Enums\VideoCodecProfile.cs" />
+    <Compile Include="Helpers\FfMpeg\Enums\VideoSize.cs" />
+    <Compile Include="Helpers\FfMpeg\Events\ConversionCompleteEventArgs.cs" />
+    <Compile Include="Helpers\FfMpeg\Events\ConversionDataEventArgs.cs" />
+    <Compile Include="Helpers\FfMpeg\Events\ConversionErrorEventArgs.cs" />
+    <Compile Include="Helpers\FfMpeg\Events\ConversionProgressEventArgs.cs" />
+    <Compile Include="Helpers\FfMpeg\Exceptions\FfMMpegException.cs" />
+    <Compile Include="Helpers\FfMpeg\Extensions\AaxActivationClient.cs" />
+    <Compile Include="Helpers\FfMpeg\Extensions\FormatHelper.cs" />
+    <Compile Include="Helpers\FfMpeg\Extensions\ProcessExtensions.cs" />
+    <Compile Include="Helpers\FfMpeg\Extensions\StringExtensions.cs" />
+    <Compile Include="Helpers\FfMpeg\FfMpegArgumentBuilder.cs" />
+    <Compile Include="Helpers\FfMpeg\FfMpegParameters.cs" />
+    <Compile Include="Helpers\FfMpeg\FfMpegProcess.cs" />
+    <Compile Include="Helpers\FfMpeg\FfMpegTask.cs" />
+    <Compile Include="Helpers\FfMpeg\FfProbe.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AbstractPrimitiveTypes.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\ActivationCode.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\ActivationCodeApp.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\ActivationCodeRegistry.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AuxLib\ApplEnv.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AuxLib\ArgParser.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AuxLib\BigEndianReader.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AuxLib\BooleanYesNoConverter.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AuxLib\ChainPunctuation.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AuxLib\DefaultSettings.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AuxLib\Encoding.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AuxLib\EnumChainTypeConverter.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AuxLib\EnumConverter.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AuxLib\EnumUtil.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AuxLib\ExtensionMethods.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AuxLib\IInteractionCallback.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AuxLib\Indent.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AuxLib\InteractionCallback.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AuxLib\InteractionMessage.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AuxLib\Interfaces.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AuxLib\Logging.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AuxLib\ProcessHost.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AuxLib\ProcessList.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AuxLib\ResourceGuard.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AuxLib\ResourceManagerEx.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\AuxLib\Singleton.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\CustomAttributes.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\Enums.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\Extensions.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\Interfaces.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\ResourceInterface.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\SettingsInterface.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\ToStringConverter.cs" />
+    <Compile Include="Helpers\FfMpeg\Helpers\AudibleActivationBytes\ToStringConverters.cs" />
+    <Compile Include="Helpers\FfMpeg\MediaFile.cs" />
+    <Compile Include="Helpers\FfMpeg\MetaData.cs" />
+    <Compile Include="Helpers\FfMpeg\Models\AudibleCliProfile.cs" />
+    <Compile Include="Helpers\FfMpeg\Models\ProgressData.cs" />
+    <Compile Include="Helpers\FfMpeg\RegexEngine.cs" />
+    <Compile Include="Helpers\FfMpeg\Services\IPlaylistCreator.cs" />
+    <Compile Include="Helpers\FfMpeg\Services\M3uPlaylistCreator.cs" />
+    <Compile Include="Helpers\FfMpeg\Services\XspfPlaylistCreator.cs" />
+    <Compile Include="Helpers\ProcessHelper.cs" />
     <Compile Include="MediaInfoDLL.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
+    <Compile Include="Models\AudibleLibrary.cs" />
     <Compile Include="Models\MetaData.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -69,6 +159,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="favicon.ico" />
+    <None Include="ffmpeg.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ffprobe.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Content Include="MediaInfo.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -206,9 +206,15 @@ namespace AudiobookOrganiser.Business
              * Genre
              */
 
-            metaData.Genre = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "book_genre"))?
-                                   .Replace("  ", " ")
-                                   .Trim();
+            if (string.IsNullOrEmpty(metaData.Genre))
+                metaData.Genre = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "book_genre"))?
+                                       .Replace("  ", " ")
+                                       .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Genre))
+                metaData.Genre = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "BOOK_GENRE"))?
+                                       .Replace("  ", " ")
+                                       .Trim();
 
             if (string.IsNullOrEmpty(metaData.Genre))
                 metaData.Genre = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Book_Genre"))?
@@ -224,6 +230,35 @@ namespace AudiobookOrganiser.Business
                 metaData.Genre = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Genre"))?
                                     .Replace("  ", " ")
                                     .Trim();
+
+            /*
+             * Asin
+             */
+
+            if (string.IsNullOrEmpty(metaData.Asin))
+                metaData.Asin = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "CDEK"))?
+                                    .Replace("  ", " ")
+                                    .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Asin))
+                metaData.Asin = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "cdek"))?
+                                    .Replace("  ", " ")
+                                    .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Asin))
+                metaData.Asin = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "asin"))?
+                                       .Replace("  ", " ")
+                                       .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Asin))
+                metaData.Asin = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Asin"))?
+                                       .Replace("  ", " ")
+                                       .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Asin))
+                metaData.Asin = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "ASIN"))?
+                                       .Replace("  ", " ")
+                                       .Trim();
 
             try
             {
@@ -258,7 +293,7 @@ namespace AudiobookOrganiser.Business
                     metaData.Genre = string.Join(", ", tagLibInfo.Tag.Genres)?
                                             .Replace("  ", " ")
                                             .Trim();
-               
+
             }
             catch { }
 
@@ -327,6 +362,8 @@ namespace AudiobookOrganiser.Business
                         metaData.Narrator = narratorParts[0].Trim();
                 }
             }
+
+            mediaInfo.Close();
 
             return metaData;
         }
