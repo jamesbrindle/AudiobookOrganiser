@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using static System.Extensions;
 
 namespace AudiobookOrganiser.Business.Tasks
@@ -34,33 +35,6 @@ namespace AudiobookOrganiser.Business.Tasks
                                 (string.IsNullOrEmpty(metaData.SeriesPart)
                                         ? ""
                                         : metaData.SeriesPart + ". ") +
-                                metaData.Title +
-                                    (string.IsNullOrEmpty(metaData.SeriesPart)
-                                        ? ""
-                                        : " (Book " + metaData.SeriesPart + ")") +
-                                     " - " +
-                                    (string.IsNullOrEmpty(metaData.Year)
-                                        ? ""
-                                        : metaData.Year) +
-                                    (string.IsNullOrEmpty(metaData.Narrator)
-                                        ? ""
-                                        : (string.IsNullOrEmpty(metaData.Year)
-                                            ? ""
-                                            : " ") +
-                                            "(Narrated - " + metaData.Narrator + ")")
-                                    + Path.GetExtension(audioFilePath));
-
-                            if (newFilename.Length > 255)
-                            {
-                                metaData = MetaDataReader.GetMetaData(audioFilePath, true, true, libraryRootPath);
-
-                                newFilename = Path.Combine(
-                                    outputDirectory,
-                                    metaData.Author,
-                                    metaData.Series,
-                                    (string.IsNullOrEmpty(metaData.SeriesPart)
-                                            ? ""
-                                            : metaData.SeriesPart + ". ") +
                                     metaData.Title +
                                         (string.IsNullOrEmpty(metaData.SeriesPart)
                                             ? ""
@@ -75,6 +49,33 @@ namespace AudiobookOrganiser.Business.Tasks
                                                 ? ""
                                                 : " ") +
                                                 "(Narrated - " + metaData.Narrator + ")")
+                                    + Path.GetExtension(audioFilePath));
+
+                            if (newFilename.Length > 255)
+                            {
+                                metaData = MetaDataReader.GetMetaData(audioFilePath, true, true, libraryRootPath);
+
+                                newFilename = Path.Combine(
+                                    outputDirectory,
+                                    metaData.Author,
+                                    metaData.Series,
+                                    (string.IsNullOrEmpty(metaData.SeriesPart)
+                                            ? ""
+                                            : metaData.SeriesPart + ". ") +
+                                        metaData.Title +
+                                            (string.IsNullOrEmpty(metaData.SeriesPart)
+                                                ? ""
+                                                : " (Book " + metaData.SeriesPart + ")") +
+                                             " - " +
+                                            (string.IsNullOrEmpty(metaData.Year)
+                                                ? ""
+                                                : metaData.Year) +
+                                            (string.IsNullOrEmpty(metaData.Narrator)
+                                                ? ""
+                                                : (string.IsNullOrEmpty(metaData.Year)
+                                                    ? ""
+                                                    : " ") +
+                                                    "(Narrated - " + metaData.Narrator + ")")
                                         + Path.GetExtension(audioFilePath));
 
                                 if (newFilename.Length > 255)
@@ -120,6 +121,81 @@ namespace AudiobookOrganiser.Business.Tasks
                     }
                     catch { }
                 }
+            }
+
+            DeleteEmptyDirectoriesFromLibrary(libraryRootPath);
+            MoveFromRenamedFolderToLibraryFolder(libraryRootPath);
+        }
+
+        private static void DeleteEmptyDirectoriesFromLibrary(string libraryRootPath)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Out.WriteLine("\n\nDeleting leftover empty directories from library...");
+            Console.ForegroundColor = ConsoleColor.White;
+
+            ConsoleEx.WriteColouredLine(ConsoleColor.Yellow, "\n\nDeleting leftover empty directories from library...");
+
+            var directories = Directory.GetDirectories(libraryRootPath, "*.*", SearchOption.TopDirectoryOnly);
+            foreach (var directory in directories)
+            {
+                var files = Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories);
+                if (files.Length == 0)
+                {
+                    try
+                    {
+                        Directory.Delete(directory, true);
+                    }
+                    catch { }
+                }
+            }
+        }
+
+        private static void MoveFromRenamedFolderToLibraryFolder(string libraryRootPath)
+        {
+            ConsoleEx.WriteColouredLine(ConsoleColor.Yellow, "\n\nMoving from renamed temp folder to library...\n\n");
+
+            string outputDirectory = Path.Combine(libraryRootPath, Program.OutputDirectoryName);
+
+            var directories = Directory.GetDirectories(outputDirectory, "*.*", SearchOption.TopDirectoryOnly);
+            foreach (var directory in directories)
+            {
+                Console.Out.WriteLine(Path.GetFileNameWithoutExtension(new DirectoryInfo(directory).Name));
+
+                try
+                {
+                    Directory.Move(
+                        directory,
+                        Path.Combine(libraryRootPath, new DirectoryInfo(directory).Name));
+                }
+                catch
+                {
+                    ConsoleEx.WriteColouredLine(ConsoleColor.Red, $"Could not move file: {directory}");
+                }
+            }
+
+            var renamedDirectories = Directory.GetDirectories(outputDirectory, "*.*", SearchOption.TopDirectoryOnly);
+            foreach (var directory in renamedDirectories)
+            {
+                var files = Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories);
+
+                if (files.Length == 0)
+                {
+                    try
+                    {
+                        Directory.Delete(directory, true);
+                    }
+                    catch { }
+                }
+            }
+
+            var anyFilesInRenamed = Directory.GetFiles(outputDirectory, "*.*", SearchOption.AllDirectories);
+            if (anyFilesInRenamed.Length == 0)
+            {
+                try
+                {
+                    Directory.Delete(outputDirectory, true);
+                }
+                catch { }
             }
         }
     }

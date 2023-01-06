@@ -20,23 +20,20 @@ namespace AudiobookOrganiser
             if (args.Contains("-audible-sync"))
             {
                 SyncFromAudibleCli.Run();
+                ConsoleEx.WriteColoured(ConsoleColor.Green, "\n\nDONE!");
             }
             else
             {
                 foreach (var library in LibraryRootPaths)
                 {
                     ConsoleEx.WriteColouredLine(ConsoleColor.Cyan, $"\n\nLIBRARY {library}\n\n");
-
-                    ReorganiseFilesAlreadyInLibrary.Run(library);
-                    DeleteEmptyDirectoriesFromLibrary.Run(library);
-                    MoveFromRenamedFolderToLibraryFolder.Run(library);
+                    ReorganiseFilesAlreadyInLibrary.Run(library);                   
                 }
 
                 SyncFromOpenAudibleDownloads.Run();
+                ConvertExistingMp3ToM4b.Run();
 
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.Out.WriteLine("\n\nDONE!");
-                Console.ForegroundColor = ConsoleColor.White;
+                ConsoleEx.WriteColoured(ConsoleColor.Green, "\n\nDONE!");
 
                 // Give time to see output before closing console
                 Thread.Sleep(3000);

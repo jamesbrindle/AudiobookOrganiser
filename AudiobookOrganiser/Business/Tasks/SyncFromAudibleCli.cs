@@ -61,11 +61,22 @@ namespace AudiobookOrganiser.Business.Tasks
                 Thread.Sleep(5000);
                 return;
             }
+
+            try
+            {
+                CopyBooksToLibraryFolder();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error: {e.Message}");
+                Thread.Sleep(5000);
+                return;
+            }
         }
 
         private static void ExportLibrary()
         {
-            ConsoleEx.WriteColouredLine(ConsoleColor.White, "Exporing library...");
+            ConsoleEx.WriteColouredLine(ConsoleColor.White, "Getting library data from Audible...");
 
             ProcessHelper.ExecuteProcessAndReadStdOut(
                 "audible.exe",
@@ -114,9 +125,9 @@ namespace AudiobookOrganiser.Business.Tasks
                 return null;
 
             string fileContents = File.ReadAllText(libraryLastDownloadPath)?
-                                       .Replace(" ", "")?.Replace("\r", "")?
-                                       .Replace("\n", "")?
-                                       .Trim();
+                                      .Replace(" ", "")?.Replace("\r", "")?
+                                      .Replace("\n", "")?
+                                      .Trim();
 
             if (!string.IsNullOrEmpty(fileContents))
             {
@@ -160,87 +171,170 @@ namespace AudiobookOrganiser.Business.Tasks
                 if (!Directory.Exists(convertedPath))
                     Directory.CreateDirectory(convertedPath);
 
-                foreach (var file in Directory.GetFiles(Program.AudibleCliSyncPath))
+                Parallel.ForEach(
+                    Directory.GetFiles(Program.AudibleCliSyncPath, "*.*", SearchOption.AllDirectories).AsParallel(),
+                    new ParallelOptions { MaxDegreeOfParallelism = 2 },
+                    audioFile =>
                 {
-                    if (Path.GetFileName(file) == "audible-library-last-download.txt")
-                        continue;
-                    else if (Path.GetFileName(file) == "audible-library.json")
-                        continue;
-                    else if (!(Path.GetExtension(file).ToLower() == ".aa" ||
-                        Path.GetExtension(file).ToLower() == ".aax" ||
-                        Path.GetExtension(file).ToLower() == ".aaxc"))
+                    if (Path.GetDirectoryName(audioFile) != convertedPath)
                     {
-                        continue;
-                    }
-                    else
-                    {
-                        string newPath = Path.Combine(convertedPath, Path.GetFileNameWithoutExtension(file) + ".m4b");
-
-                        if (!File.Exists(newPath))
+                        if (Path.GetFileName(audioFile) == "audible-library-last-download.txt")
+                            return;
+                        else if (Path.GetFileName(audioFile) == "audible-library.json")
+                            return;
+                        else if (!(Path.GetExtension(audioFile).ToLower() == ".aa" ||
+                            Path.GetExtension(audioFile).ToLower() == ".aax" ||
+                            Path.GetExtension(audioFile).ToLower() == ".aaxc"))
                         {
-                            var cancelTokenSource = new CancellationTokenSource();
-                            var cancelToken = cancelTokenSource.Token;
-                            var conversionOptions = new ConversionOptions
+                            return;
+                        }
+                        else
+                        {
+                            string newPath = Path.Combine(convertedPath, Path.GetFileNameWithoutExtension(audioFile) + ".m4b");
+
+                            if (!File.Exists(newPath))
                             {
-                                Format = FfMpeg.Enums.Format.m4b,
-                                HideBanner = true,
-                                Copy = true,
-                                HWAccelOutputFormatCopy = true,
-                                Codec = FfMpeg.Enums.Codec.copy,
-                                Overwrite = true
-                            };
+                                var cancelTokenSource = new CancellationTokenSource();
+                                var cancelToken = cancelTokenSource.Token;
+                                var conversionOptions = new ConversionOptions
+                                {
+                                    Format = FfMpeg.Enums.Format.m4b,
+                                    HideBanner = true,
+                                    Copy = true,
+                                    HWAccelOutputFormatCopy = true,
+                                    Codec = FfMpeg.Enums.Codec.copy,
+                                    Overwrite = true
+                                };
 
-                            if (Path.GetExtension(file).ToLower() == ".aax") // Audible file 
-                            {
-                                conversionOptions.ActivationBytes = GetActivationBytes(file, out string _);
-                                conversionOptions.AudibleKey = null;
-                                conversionOptions.AudibleIv = null;
-                            }
-                            else if (Path.GetExtension(file).ToLower() == ".aaxc") // Audible file
-                            {
-                                var keyAndIv = GetAudibleKeyAndIv(Path.ChangeExtension(file, ".voucher"), out string _);
+                                ResolveAudibleFileDecryptionCodes(audioFile, ref conversionOptions);
 
-                                conversionOptions.ActivationBytes = null;
-                                conversionOptions.AudibleKey = keyAndIv.Key;
-                                conversionOptions.AudibleIv = keyAndIv.Iv;
-                            }
+                                var metaData = MetaDataReader.GetMetaData(audioFile, false, false, null);
+                                var audibleBookProperties = audibleLibrary.Where(m => m.asin == metaData.Asin)?.FirstOrDefault();
 
-                            var metaData = MetaDataReader.GetMetaData(file, false, false, null);
-                            var audibleBookProperties = audibleLibrary.Where(m => m.asin == metaData.Asin)?.FirstOrDefault();
+                                if (audibleBookProperties != null)
+                                {
+                                    var engine = new Engine(Program.FfMpegPath);
+                                    Task.Run(() => engine.ConvertAsync(
+                                        new MediaFile(audioFile),
+                                        new MediaFile(newPath),
+                                        conversionOptions,
+                                        cancelToken)).Wait();
 
-                            if (audibleBookProperties != null)
-                            {
-                                var engine = new Engine(Program.FfMpegPath);
-                                Task.Run(() => engine.ConvertAsync(
-                                    new MediaFile(file),
-                                    new MediaFile(newPath),
-                                    conversionOptions,
-                                    cancelToken)).Wait();
-
-                                Track track = new Track(newPath);
-
-                                track.Composer = audibleBookProperties.narrators;
-                                track.Genre = "Audiobook";                               
-                                track.AdditionalFields["----:com.apple.iTunes:SERIES"] = audibleBookProperties.series_title;
-                                track.AdditionalFields["----:com.apple.iTunes:SERIES-PART"] = audibleBookProperties.series_sequence;
-                                track.AdditionalFields["----:com.apple.iTunes:NRT"] = audibleBookProperties.narrators;
-                                track.AdditionalFields["----:com.apple.iTunes:book_genre"] = audibleBookProperties.narrators;
-                                track.Group = $"Book {audibleBookProperties.series_sequence}, {audibleBookProperties.series_title}";
-                                track.AdditionalFields["ASIN"] = audibleBookProperties.asin;
-
-                                bool isReadonly = track.AdditionalFields.IsReadOnly;
-
-                                track.Save();
+                                    AlterMetaDataOfConvertedFile(newPath, audibleBookProperties);
+                                    CopyPdf(audioFile, newPath);
+                                }
                             }
                         }
                     }
-                }
+                });
             }
         }
 
-        private static void ComplimentMetaDataFile(string metaDataFilePath, Models.MetaData metaData)
+        private static void CopyPdf(string originalFilePath, string copyToFilePath)
         {
-          
+            try
+            {
+                string originalPdfName;
+                string copyPdfName;
+
+                if (Path.GetExtension(originalFilePath).ToLower() == ".aaxc")
+                {
+                    originalPdfName = Path.GetFileNameWithoutExtension(originalFilePath).Substring(0, Path.GetFileNameWithoutExtension(originalFilePath).IndexOf("-AAX_")) + ".pdf";
+                    copyPdfName = Path.GetFileNameWithoutExtension(copyToFilePath).Substring(0, Path.GetFileNameWithoutExtension(copyToFilePath).IndexOf("-AAX_")) + ".pdf";
+                }
+                else
+                {
+                    originalPdfName = Path.GetFileNameWithoutExtension(originalFilePath).Substring(0, Path.GetFileNameWithoutExtension(originalFilePath).IndexOf("-LC_")) + ".pdf";
+                    copyPdfName = Path.GetFileNameWithoutExtension(copyToFilePath).Substring(0, Path.GetFileNameWithoutExtension(copyToFilePath).IndexOf("-LC_")) + ".pdf";
+                }
+
+                string originalPdfPath = Path.Combine(Path.GetDirectoryName(originalFilePath), originalPdfName);
+                string copyPdfPath = Path.Combine(Path.GetDirectoryName(copyToFilePath), copyPdfName);
+
+                if (File.Exists(originalPdfPath) &&
+                    !File.Exists(copyPdfPath))
+                {
+                    File.Copy(originalPdfPath, copyPdfPath);
+                }
+            }
+            catch { }
+        }
+
+        private static void ResolveAudibleFileDecryptionCodes(string filePath, ref ConversionOptions conversionOptions)
+        {
+            if (Path.GetExtension(filePath).ToLower() == ".aax") // Audible file 
+            {
+                conversionOptions.ActivationBytes = GetActivationBytes(filePath, out string _);
+                conversionOptions.AudibleKey = null;
+                conversionOptions.AudibleIv = null;
+            }
+            else if (Path.GetExtension(filePath).ToLower() == ".aaxc") // Audible file
+            {
+                var keyAndIv = GetAudibleKeyAndIv(Path.ChangeExtension(filePath, ".voucher"), out string _);
+
+                conversionOptions.ActivationBytes = null;
+                conversionOptions.AudibleKey = keyAndIv.Key;
+                conversionOptions.AudibleIv = keyAndIv.Iv;
+            }
+        }
+
+        private static void AlterMetaDataOfConvertedFile(string filePath, AudibleLibrary.Property audibleLibraryProperties)
+        {
+            Track track = new Track(filePath);
+
+            track.Composer = audibleLibraryProperties.narrators;
+            track.Genre = "Audiobook";
+
+            if (!string.IsNullOrWhiteSpace(audibleLibraryProperties.series_title))
+            {
+                track.Group = $"Book {audibleLibraryProperties.series_sequence}, {audibleLibraryProperties.series_title}";
+                track.AdditionalFields["----:com.apple.iTunes:SERIES"] = audibleLibraryProperties.series_title;
+                track.AdditionalFields["----:com.apple.iTunes:SERIES-PART"] = audibleLibraryProperties.series_sequence;
+            }
+
+            track.Title = audibleLibraryProperties.title.Replace("(Unabridged)", "").Trim();
+            track.AdditionalFields["----:com.apple.iTunes:NRT"] = audibleLibraryProperties.narrators;
+            track.AdditionalFields["----:com.apple.iTunes:book_genre"] = audibleLibraryProperties.genres;
+            track.AdditionalFields["ASIN"] = audibleLibraryProperties.asin;
+
+            track.Save();
+        }
+
+        private static void CopyBooksToLibraryFolder()
+        {
+            ConsoleEx.WriteColouredLine(ConsoleColor.White, "Copying to library folder...");
+
+            foreach (var audioFile in Directory.GetFiles(Path.Combine(Program.AudibleCliSyncPath, "Converted"), "*.m4b", SearchOption.AllDirectories))
+            {
+                try
+                {
+                    var mediaInfo = new MediaInfoLib.MediaInfo();
+                    mediaInfo.Option(audioFile);
+
+                    var metaData = MetaDataReader.GetMetaData(audioFile, false, false, null);
+
+                    string copyToPath = Path.Combine(
+                        LibraryPathHelper.DetermineLibraryPath(metaData),
+                        MetaDataReader.GetAudiobookTitle(audioFile));
+
+                    string mp3Path = Path.ChangeExtension(copyToPath, ".mp3");
+
+                    if (File.Exists(mp3Path))
+                        File.Delete(mp3Path);
+
+                    // Temp: TODO: Remove after initial run
+
+                    //if (File.Exists(copyToPath))
+                    //    File.Delete(copyToPath);
+
+                    //
+
+                    File.Copy(audioFile, copyToPath);
+
+                    CopyPdf(audioFile, copyToPath);
+                }
+                catch { }
+            }
         }
     }
 }

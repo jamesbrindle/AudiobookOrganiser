@@ -1,4 +1,5 @@
-﻿using FfMpeg.Enums;
+﻿using AudiobookOrganiser.Helpers;
+using FfMpeg.Enums;
 using FfMpeg.Extensions;
 using System;
 using System.Globalization;
@@ -49,10 +50,13 @@ namespace FfMpeg
             var defaultTimeSpan = TimeSpan.FromSeconds(1);
             var commandBuilder = new StringBuilder();
 
-            commandBuilder.AppendFormat(
-                CultureInfo.InvariantCulture,
-                " -ss {0} ",
-                conversionOptions?.Seek.GetValueOrDefault(defaultTimeSpan).TotalSeconds ?? defaultTimeSpan.TotalSeconds);
+            if (!Path.GetExtension(inputFile.FileInfo.Name).ToLower().In(FileTypes.Audio))
+            {
+                commandBuilder.AppendFormat(
+                    CultureInfo.InvariantCulture,
+                    " -ss {0} ",
+                    conversionOptions?.Seek.GetValueOrDefault(defaultTimeSpan).TotalSeconds ?? defaultTimeSpan.TotalSeconds);
+            }
 
             commandBuilder.AppendFormat(" -i \"{0}\" ", inputFile.FileInfo.FullName);
             commandBuilder.AppendFormat(" -vframes {0} ", 1);
@@ -75,6 +79,12 @@ namespace FfMpeg
             ConversionOptions conversionOptions)
         {
             var commandBuilder = new StringBuilder();
+
+            if (FormatHelper.GetFormatMediaType(conversionOptions.Format) == FormatType.Video &&
+                !string.IsNullOrEmpty(conversionOptions.ImagePathForWhenConvertingAudioToVideo))
+            {
+                conversionOptions.VideoCodecPreset = VideoCodecPreset.fast;
+            }
 
             if (conversionOptions.Format == Format._3gp)
                 conversionOptions.ExtraArguments = "-vcodec h263 -ar 8000 -b:a 12.20k -ac 1 -s 704x576";
@@ -125,6 +135,12 @@ namespace FfMpeg
                 commandBuilder.Append($" -audible_iv {conversionOptions.AudibleIv} ");
             }
 
+            if (FormatHelper.GetFormatMediaType(conversionOptions.Format) == FormatType.Video &&
+                !string.IsNullOrEmpty(conversionOptions.ImagePathForWhenConvertingAudioToVideo))
+            {
+                commandBuilder.Append($" -loop 1  -i \"{conversionOptions.ImagePathForWhenConvertingAudioToVideo}\"");
+            }
+
             commandBuilder.AppendFormat(" -i \"{0}\" ", inputFile.FileInfo.FullName);
 
             // Physical media conversion (DVD etc)
@@ -169,6 +185,12 @@ namespace FfMpeg
             // Video Codec Profile
             if (conversionOptions.VideoCodecProfile != VideoCodecProfile.Default)
                 commandBuilder.AppendFormat(" -profile:v {0} ", conversionOptions.VideoCodecProfile);
+
+            if (FormatHelper.GetFormatMediaType(conversionOptions.Format) == FormatType.Video &&
+               !string.IsNullOrEmpty(conversionOptions.ImagePathForWhenConvertingAudioToVideo))
+            {
+                commandBuilder.Append(" -tune stillimage ");
+            }
 
             // Video Time Scale
             if (conversionOptions.VideoTimeScale != null && conversionOptions.VideoTimeScale != 1)
@@ -233,12 +255,17 @@ namespace FfMpeg
 
             #endregion
 
-            if (conversionOptions.MapMetadata) 
-                commandBuilder.Append(" -map_metadata 0 ");
+            if (conversionOptions.MapMetadata) commandBuilder.Append(" -map_metadata 0 ");
 
             // Extra arguments
             if (conversionOptions.ExtraArguments != null)
                 commandBuilder.AppendFormat(" {0} ", conversionOptions.ExtraArguments);
+
+            if (FormatHelper.GetFormatMediaType(conversionOptions.Format) == FormatType.Video &&
+               !string.IsNullOrEmpty(conversionOptions.ImagePathForWhenConvertingAudioToVideo))
+            {
+                commandBuilder.Append(" -shortest ");
+            }
 
             return commandBuilder.AppendFormat(" {0}\"{1}\" ", conversionOptions.Overwrite ? "-y " : "", outputFile.FileInfo.FullName).ToString();
         }

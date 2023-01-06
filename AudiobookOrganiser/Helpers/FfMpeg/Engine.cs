@@ -126,7 +126,6 @@ namespace FfMpeg
                 InputFile = input,
                 OutputFile = output,
                 ConversionOptions = options
-
             };
 
             await ExecuteAsync(parameters, cancellationToken);

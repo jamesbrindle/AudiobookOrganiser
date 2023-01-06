@@ -74,6 +74,8 @@ namespace FfMpeg
 
         public bool Overwrite { get; set; } = false;
 
+        public string ImagePathForWhenConvertingAudioToVideo { get; set; } = string.Empty;
+
         public void CutMedia(TimeSpan seekToPosition, TimeSpan length)
         {
             Seek = seekToPosition;

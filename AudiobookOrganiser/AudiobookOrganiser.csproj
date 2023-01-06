@@ -65,9 +65,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Business\Tasks\ConvertExistingMp3ToM4b.cs" />
+    <Compile Include="Helpers\FileTypes.cs" />
+    <Compile Include="Helpers\LibraryPathHelper.cs" />
     <Compile Include="Business\MetaDataReader.cs" />
-    <Compile Include="Business\Tasks\DeleteEmptyDirectoriesFromLibrary.cs" />
-    <Compile Include="Business\Tasks\MoveFromRenamedFolderToLibraryFolder.cs" />
     <Compile Include="Business\Tasks\SyncFromAudibleCli.cs" />
     <Compile Include="Business\Tasks\SyncFromOpenAudibleDownloads.cs" />
     <Compile Include="Business\Tasks\ReorganiseFilesAlreadyInLibrary.cs" />

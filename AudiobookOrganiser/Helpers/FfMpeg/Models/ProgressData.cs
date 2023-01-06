@@ -21,6 +21,5 @@ namespace FfMpeg.Models
         public TimeSpan ProcessedDuration { get; }
         public double? Bitrate { get; }
         public TimeSpan TotalDuration { get; internal set; }
-
     }
 }

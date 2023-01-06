@@ -1,7 +1,6 @@
-﻿using AudiobookOrganiser.Models;
+﻿using AudiobookOrganiser.Helpers;
 using System;
 using System.IO;
-using System.Linq;
 using static System.Extensions;
 
 namespace AudiobookOrganiser.Business.Tasks
@@ -28,7 +27,7 @@ namespace AudiobookOrganiser.Business.Tasks
                     if (!string.IsNullOrEmpty(metaData.Author) && !string.IsNullOrEmpty(metaData.Title))
                     {
                         string newFilename = Path.Combine(
-                            DetermineLibraryPath(metaData),
+                            LibraryPathHelper.DetermineLibraryPath(metaData),
                             metaData.Author,
                             metaData.Series,
                             (string.IsNullOrEmpty(metaData.SeriesPart)
@@ -55,7 +54,7 @@ namespace AudiobookOrganiser.Business.Tasks
                             metaData = MetaDataReader.GetMetaData(audioFilePath, true, true);
 
                             newFilename = Path.Combine(
-                                DetermineLibraryPath(metaData),
+                                LibraryPathHelper.DetermineLibraryPath(metaData),
                                 metaData.Author,
                                 metaData.Series,
                                 (string.IsNullOrEmpty(metaData.SeriesPart)
@@ -112,37 +111,6 @@ namespace AudiobookOrganiser.Business.Tasks
                         $"{e.Message}");
                 }
             }
-        }
-
-        private static string DetermineLibraryPath(MetaData metaData)
-        {
-            if (string.IsNullOrWhiteSpace(metaData.Genre))
-                return Program.LibraryRootPaths.Where(l => l == "Fiction").FirstOrDefault();
-
-            if (metaData.Genre.StringContainsIn(
-                "comedy",
-                "stand-up",
-                "stand up",
-                "humour"))
-
-            {
-                return Program.LibraryRootPaths.Where(l => l.StringContainsIn("Comedy")).FirstOrDefault();
-            }
-
-            else if (metaData.Genre.StringContainsIn(
-                "fiction",
-                "mystery",
-                "triller",
-                "suspense",
-                "crime",
-                "romance",
-                "classics",
-                "fantasy"))
-            {
-                return Program.LibraryRootPaths.Where(l => l.Contains("\\Fiction")).FirstOrDefault();
-            }
-
-            return Program.LibraryRootPaths.Where(l => l.StringContainsIn("Non-Fiction")).FirstOrDefault();
-        }
+        }     
     }
 }

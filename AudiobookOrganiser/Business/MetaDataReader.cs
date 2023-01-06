@@ -10,7 +10,11 @@ namespace AudiobookOrganiser.Business
     {
         static readonly char[] _invalidFileNameChars = Path.GetInvalidFileNameChars();
 
-        public static MetaData GetMetaData(string audioFile, bool tryParseMetaFromPath, bool small, string libraryRootPath = null)
+        public static MetaData GetMetaData(
+            string audioFile,
+            bool tryParseMetaFromPath,
+            bool small,
+            string libraryRootPath = null)
         {
             var metaData = new MetaData();
 
@@ -20,19 +24,19 @@ namespace AudiobookOrganiser.Business
                 metaData = GetMetaDataByParsingFilePath(metaData, libraryRootPath, audioFile);
 
             if (!string.IsNullOrEmpty(metaData.Author))
-                metaData.Author = new string(metaData.Author.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
+                metaData.Author = new string(metaData.Author.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());    
 
             if (!string.IsNullOrEmpty(metaData.Narrator))
                 metaData.Narrator = new string(metaData.Narrator.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
 
             if (!string.IsNullOrEmpty(metaData.Title))
-                metaData.Title = new string(metaData.Title.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
+                metaData.Title = new string(metaData.Title.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());                
 
             if (!string.IsNullOrEmpty(metaData.Series))
-                metaData.Series = new string(metaData.Series.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
+                metaData.Series = new string(metaData.Series.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());                
 
             if (!string.IsNullOrEmpty(metaData.SeriesPart))
-                metaData.SeriesPart = new string(metaData.SeriesPart.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
+                metaData.SeriesPart = new string(metaData.SeriesPart.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());               
 
             if (!string.IsNullOrEmpty(metaData.Year))
                 metaData.Year = new string(metaData.Year.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
@@ -40,7 +44,78 @@ namespace AudiobookOrganiser.Business
             return metaData;
         }
 
-        private static MetaData GetMetaDataByTags(MetaData metaData, string audioFilePath, bool small)
+        public static string GetAudiobookTitle(string audioFilePath)
+        {
+            string newFilename = Path.GetFileName(audioFilePath);
+
+            try
+            {
+                var metaData = GetMetaData(audioFilePath, true, false, null);
+
+                if (!string.IsNullOrEmpty(metaData.Author) && !string.IsNullOrEmpty(metaData.Title))
+                {
+                    newFilename =
+                        (string.IsNullOrEmpty(metaData.Author) ? "" : (metaData.Author + "\\")) +
+                        (string.IsNullOrEmpty(metaData.Series) ? "" : (metaData.Series + "\\")) +
+                        (string.IsNullOrEmpty(metaData.SeriesPart)
+                                ? ""
+                                : metaData.SeriesPart + ". ") +
+                            metaData.Title +
+                                (string.IsNullOrEmpty(metaData.SeriesPart)
+                                    ? ""
+                                    : " (Book " + metaData.SeriesPart + ")") +
+                                 " - " +
+                                (string.IsNullOrEmpty(metaData.Year)
+                                    ? ""
+                                    : metaData.Year) +
+                                (string.IsNullOrEmpty(metaData.Narrator)
+                                    ? ""
+                                    : (string.IsNullOrEmpty(metaData.Year)
+                                        ? ""
+                                        : " ") +
+                                        "(Narrated - " + metaData.Narrator + ")")
+                            + Path.GetExtension(audioFilePath);
+
+                    if ((Path.GetDirectoryName(audioFilePath) + "\\" + newFilename).Length > 255)
+                    {
+                        metaData = GetMetaData(audioFilePath, true, true, null);
+
+                        newFilename =
+                            (string.IsNullOrEmpty(metaData.Author) ? "" : (metaData.Author + "\\")) +
+                            (string.IsNullOrEmpty(metaData.Series) ? "" : (metaData.Series + "\\")) +
+                            (string.IsNullOrEmpty(metaData.SeriesPart)
+                                    ? ""
+                                    : metaData.SeriesPart + ". ") +
+                                metaData.Title +
+                                    (string.IsNullOrEmpty(metaData.SeriesPart)
+                                        ? ""
+                                        : " (Book " + metaData.SeriesPart + ")") +
+                                     " - " +
+                                    (string.IsNullOrEmpty(metaData.Year)
+                                        ? ""
+                                        : metaData.Year) +
+                                    (string.IsNullOrEmpty(metaData.Narrator)
+                                        ? ""
+                                        : (string.IsNullOrEmpty(metaData.Year)
+                                            ? ""
+                                            : " ") +
+                                            "(Narrated - " + metaData.Narrator + ")")
+                                + Path.GetExtension(audioFilePath);
+
+                        if ((Path.GetDirectoryName(audioFilePath) + "\\" + newFilename).Length > 255)
+                            newFilename = Path.GetFileName(audioFilePath);
+                    }
+                }
+            }
+            catch { }
+
+            return newFilename;
+        }
+
+        private static MetaData GetMetaDataByTags(
+            MetaData metaData,
+            string audioFilePath,
+            bool small)
         {
             var mediaInfo = new MediaInfoLib.MediaInfo();
             mediaInfo.Open(audioFilePath);
@@ -264,43 +339,6 @@ namespace AudiobookOrganiser.Business
                 metaData.Asin = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "ASIN"))?
                                        .Replace("  ", " ")
                                        .Trim();
-
-            try
-            {
-                // Fallback
-
-                var tagLibInfo = TagLib.File.Create(audioFilePath);
-
-                if (string.IsNullOrEmpty(metaData.Author))
-                    metaData.Author = string.Join(", ", tagLibInfo.Tag.Performers)?
-                                            .Replace("  ", " ")
-                                            .Trim();
-
-                if (string.IsNullOrEmpty(metaData.Author))
-                    metaData.Author = string.Join(", ", tagLibInfo.Tag.AlbumArtists)?
-                                            .Replace("  ", " ")
-                                            .Trim();
-
-                if (string.IsNullOrEmpty(metaData.Narrator))
-                    metaData.Narrator = string.Join(", ", tagLibInfo.Tag.Composers)?
-                                              .Replace("  ", " ")
-                                              .Trim();
-
-                if (string.IsNullOrEmpty(metaData.Title))
-                    metaData.Title = tagLibInfo.Tag.Title?.Replace("Unabridged", "")
-                                                          .Trim()
-                                                          .Replace("()", "");
-
-                if (string.IsNullOrEmpty(metaData.Year))
-                    metaData.Year = tagLibInfo.Tag.Year.ToString();
-
-                if (string.IsNullOrEmpty(metaData.Genre))
-                    metaData.Genre = string.Join(", ", tagLibInfo.Tag.Genres)?
-                                            .Replace("  ", " ")
-                                            .Trim();
-
-            }
-            catch { }
 
             // Cleaning up
 
