@@ -231,6 +231,11 @@ namespace AudiobookOrganiser.Business
                                     .Replace("  ", " ")
                                     .Trim();
 
+            if (string.IsNullOrEmpty(metaData.Genre))
+                metaData.Genre = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "GENRE"))?
+                                    .Replace("  ", " ")
+                                    .Trim();
+
             /*
              * Asin
              */
