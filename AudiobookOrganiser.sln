@@ -6,6 +6,10 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudiobookOrganiser", "AudiobookOrganiser\AudiobookOrganiser.csproj", "{18961FEC-01F2-41F6-81F5-4A523D128898}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Other Solution Files", "Other Solution Files", "{8D6E602D-5A0C-4013-8F89-355419E2C3F8}"
+	ProjectSection(SolutionItems) = preProject
+		Other Solution Files\ffmpeg.7z = Other Solution Files\ffmpeg.7z
+		Other Solution Files\ffprobe.7z = Other Solution Files\ffprobe.7z
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

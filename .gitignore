@@ -349,3 +349,6 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 
+# Github wont let me upload > 100 MB
+AudiobookOrganiser/ffmpeg.exe
+AudiobookOrganiser/ffprobe.exe
