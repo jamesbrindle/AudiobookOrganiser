@@ -27,7 +27,7 @@ namespace AudiobookOrganiser
                 foreach (var library in LibraryRootPaths)
                 {
                     ConsoleEx.WriteColouredLine(ConsoleColor.Cyan, $"\n\nLIBRARY {library}\n\n");
-                    ReorganiseFilesAlreadyInLibrary.Run(library);                   
+                    ReorganiseFilesAlreadyInLibrary.Run(library);
                 }
 
                 SyncFromOpenAudibleDownloads.Run();

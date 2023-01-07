@@ -75,6 +75,7 @@
         aax,                                 //Audible Enhanced Audiobook
         aaxc,                                //Audible Enhanced Audiobook v2
         aac,                                 //Advanced Audio Coding
+        libfdk_aac,                          //Very goog AAC encoder
         ac3,                                 //ATSC A/52A (AC-3)
         ac3_fixed,                           //ATSC A/52A (AC-3) (codec ac3)
         alac,                                //ALAC (Apple Lossless Audio Codec)
@@ -164,8 +165,9 @@
     {
         libmp3lame,                          //MPEG Audi Layer 3
         aax,                                 //Audible Enhanced Audiobook
-        aaxc,                                 //Audible Enhanced Audiobook
+        aaxc,                                //Audible Enhanced Audiobook
         aac,                                 //Advanced Audio Coding
+        libfdk_aac,                          //Very goog AAC encoder
         ac3,                                 //ATSC A/52A (AC-3)
         ac3_fixed,                           //ATSC A/52A (AC-3) (codec ac3)
         alac,                                //ALAC (Apple Lossless Audio Codec)

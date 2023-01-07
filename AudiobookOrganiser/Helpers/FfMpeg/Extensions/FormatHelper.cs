@@ -140,35 +140,49 @@ namespace FfMpeg.Extensions
             }
         }
 
-        public static Codec? GetAudioCodecFromFormat(string format)
+        public static List<Codec> GetAudioCodecFromFormat(string format)
         {
+            var codecs = new List<Codec>();
+
             switch (format)
             {
                 case "mp3":
-                    return Codec.libmp3lame;
+                    codecs.Add(Codec.libmp3lame);
+                    break;
                 case "ra":
-                    return Codec.real_144;
+                    codecs.Add(Codec.real_144);
+                    break;
                 case "aac":
                 case "m4a":
                 case "m4b":
-                    return Codec.aac;
+                    codecs.Add(Codec.libfdk_aac);
+                    codecs.Add(Codec.aac);
+                    break;
                 case "flac":
-                    return Codec.flac;
+                    codecs.Add(Codec.flac);
+                    break;
                 case "wav":
-                    return Codec.pcm_u8;
+                    codecs.Add(Codec.pcm_u8);
+                    break;
                 case "wma":
-                    return Codec.wmav2;
+                    codecs.Add(Codec.wmav2);
+                    break;
                 case "wv":
-                    return Codec.wavpack;
+                    codecs.Add(Codec.wavpack);
+                    break;
                 case "ogg":
                 case "oga":
                 case "mogg":
-                    return Codec.vorbis;
+                    codecs.Add(Codec.vorbis);
+                    break;
                 case "opus":
-                    return Codec.opus;
+                    codecs.Add(Codec.opus);
+                    break;
                 default:
                     return null;
             }
+
+            return codecs;
         }
 
         public static List<Codec> GetVideoCodecsFromFormat(string format)

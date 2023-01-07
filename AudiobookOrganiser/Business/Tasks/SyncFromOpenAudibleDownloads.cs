@@ -9,7 +9,7 @@ namespace AudiobookOrganiser.Business.Tasks
     {
         internal static void Run()
         {
-            ConsoleEx.WriteColouredLine(ConsoleColor.Yellow, "\nSyncing from OpenAudibleDownloads...\n\n");
+            ConsoleEx.WriteColouredLine(ConsoleColor.Yellow, "\n\nSyncing from OpenAudibleDownloads...\n\n");
 
             var mp3AudioFiles = Directory.GetFiles(Program.OpenAudibleDownloadsFolderMp3Path, "*.*", SearchOption.AllDirectories);
             foreach (var audioFilePath in mp3AudioFiles)
@@ -111,6 +111,6 @@ namespace AudiobookOrganiser.Business.Tasks
                         $"{e.Message}");
                 }
             }
-        }     
+        }
     }
 }

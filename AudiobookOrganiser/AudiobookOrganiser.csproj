@@ -146,6 +146,7 @@
     <Compile Include="Helpers\FfMpeg\Services\M3uPlaylistCreator.cs" />
     <Compile Include="Helpers\FfMpeg\Services\XspfPlaylistCreator.cs" />
     <Compile Include="Helpers\ProcessHelper.cs" />
+    <Compile Include="Helpers\ProgressBar.cs" />
     <Compile Include="MediaInfoDLL.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>

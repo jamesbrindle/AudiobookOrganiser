@@ -24,19 +24,19 @@ namespace AudiobookOrganiser.Business
                 metaData = GetMetaDataByParsingFilePath(metaData, libraryRootPath, audioFile);
 
             if (!string.IsNullOrEmpty(metaData.Author))
-                metaData.Author = new string(metaData.Author.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());    
+                metaData.Author = new string(metaData.Author.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
 
             if (!string.IsNullOrEmpty(metaData.Narrator))
                 metaData.Narrator = new string(metaData.Narrator.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
 
             if (!string.IsNullOrEmpty(metaData.Title))
-                metaData.Title = new string(metaData.Title.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());                
+                metaData.Title = new string(metaData.Title.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
 
             if (!string.IsNullOrEmpty(metaData.Series))
-                metaData.Series = new string(metaData.Series.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());                
+                metaData.Series = new string(metaData.Series.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
 
             if (!string.IsNullOrEmpty(metaData.SeriesPart))
-                metaData.SeriesPart = new string(metaData.SeriesPart.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());               
+                metaData.SeriesPart = new string(metaData.SeriesPart.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
 
             if (!string.IsNullOrEmpty(metaData.Year))
                 metaData.Year = new string(metaData.Year.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());

@@ -1,4 +1,5 @@
-﻿using AudiobookOrganiser.Helpers;
+﻿using ATL;
+using AudiobookOrganiser.Helpers;
 using AudiobookOrganiser.Models;
 using FfMpeg;
 using Newtonsoft.Json;
@@ -7,9 +8,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static System.Extensions;
 using static FfMpeg.Extensions.AaxActivationClient;
-using ATL;
+using static System.Extensions;
 
 namespace AudiobookOrganiser.Business.Tasks
 {
@@ -30,7 +30,7 @@ namespace AudiobookOrganiser.Business.Tasks
 
             try
             {
-                ExportLibrary();
+                DownloadLibraryDataFromAudible();
             }
             catch
             {
@@ -42,7 +42,7 @@ namespace AudiobookOrganiser.Business.Tasks
 
             try
             {
-                DownloadBooks();
+                DownloadBooksFromAudible();
             }
             catch (Exception e)
             {
@@ -74,7 +74,7 @@ namespace AudiobookOrganiser.Business.Tasks
             }
         }
 
-        private static void ExportLibrary()
+        private static void DownloadLibraryDataFromAudible()
         {
             ConsoleEx.WriteColouredLine(ConsoleColor.White, "Getting library data from Audible...");
 
@@ -85,7 +85,7 @@ namespace AudiobookOrganiser.Business.Tasks
                 throwOnError: true);
         }
 
-        private static void DownloadBooks()
+        private static void DownloadBooksFromAudible()
         {
             ConsoleEx.WriteColouredLine(ConsoleColor.White, "Downloading books...");
             var lastLibraryDownloadDate = GetLastLibraryDownloadDate();
@@ -150,7 +150,6 @@ namespace AudiobookOrganiser.Business.Tasks
             ConsoleEx.WriteColouredLine(ConsoleColor.White, "Loggin last sync date...");
 
             string libraryLastDownloadPath = Path.Combine(Program.AudibleCliSyncPath, _libraryLastDownloadName);
-
             File.WriteAllText(
                 libraryLastDownloadPath,
                 DateTime.Now.ToString("yyyy-MM-dd"));
@@ -304,7 +303,14 @@ namespace AudiobookOrganiser.Business.Tasks
         {
             ConsoleEx.WriteColouredLine(ConsoleColor.White, "Copying to library folder...");
 
-            foreach (var audioFile in Directory.GetFiles(Path.Combine(Program.AudibleCliSyncPath, "Converted"), "*.m4b", SearchOption.AllDirectories))
+            Parallel.ForEach(
+                   Directory.GetFiles(
+                        Path.Combine(
+                            Program.AudibleCliSyncPath,
+                            "Converted"),
+                            "*.m4b",
+                            SearchOption.AllDirectories).AsParallel(),
+                   new ParallelOptions { MaxDegreeOfParallelism = 4 }, audioFile =>
             {
                 try
                 {
@@ -322,19 +328,13 @@ namespace AudiobookOrganiser.Business.Tasks
                     if (File.Exists(mp3Path))
                         File.Delete(mp3Path);
 
-                    // Temp: TODO: Remove after initial run
-
-                    //if (File.Exists(copyToPath))
-                    //    File.Delete(copyToPath);
-
-                    //
-
-                    File.Copy(audioFile, copyToPath);
+                    if (!File.Exists(copyToPath))
+                        File.Copy(audioFile, copyToPath);
 
                     CopyPdf(audioFile, copyToPath);
                 }
                 catch { }
-            }
+            });
         }
     }
 }
