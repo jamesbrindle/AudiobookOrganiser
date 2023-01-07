@@ -147,7 +147,7 @@ namespace AudiobookOrganiser.Business.Tasks
 
         private static void WriteLastDownloadDate()
         {
-            ConsoleEx.WriteColouredLine(ConsoleColor.White, "Loggin last sync date...");
+            ConsoleEx.WriteColouredLine(ConsoleColor.White, "Logging last sync date...");
 
             string libraryLastDownloadPath = Path.Combine(Program.AudibleCliSyncPath, _libraryLastDownloadName);
             File.WriteAllText(
