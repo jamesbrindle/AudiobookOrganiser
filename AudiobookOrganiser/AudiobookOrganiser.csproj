@@ -84,7 +84,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Business\MetaDataWrite.cs" />
+    <Compile Include="Business\MetaDataWriter.cs" />
     <Compile Include="Business\Tasks\ConvertExistingMp3ToM4b.cs" />
     <Compile Include="Helpers\FileTypes.cs" />
     <Compile Include="Helpers\LibraryPathHelper.cs" />

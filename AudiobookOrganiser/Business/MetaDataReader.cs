@@ -21,7 +21,11 @@ namespace AudiobookOrganiser.Business
             var metaData = new AudiobookMetaData();
             metaData = GetMetaFromReadarr(metaData, audioFile);
 
-            metaData = GetMetaDataByTags(metaData, audioFile, small);
+            try
+            {
+                metaData = GetMetaDataByTags(metaData, audioFile, small);
+            }
+            catch { }
 
             if (tryParseMetaFromPath && !string.IsNullOrEmpty(libraryRootPath))
                 metaData = GetMetaDataByParsingFilePath(metaData, libraryRootPath, audioFile);
