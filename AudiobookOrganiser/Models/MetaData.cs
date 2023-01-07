@@ -1,6 +1,6 @@
 ﻿namespace AudiobookOrganiser.Models
 {
-    internal class MetaData
+    internal class AudiobookMetaData
     {
         public string Author { get; set; }
         public string Narrator { get; set; }

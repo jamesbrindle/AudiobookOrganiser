@@ -6,7 +6,7 @@ namespace AudiobookOrganiser.Helpers
 {
     internal class LibraryPathHelper
     {
-        public static string DetermineLibraryPath(MetaData metaData)
+        public static string DetermineLibraryPath(AudiobookMetaData metaData)
         {
             if (string.IsNullOrWhiteSpace(metaData.Genre))
                 return Program.LibraryRootPaths.Where(l => l == "Fiction").FirstOrDefault();

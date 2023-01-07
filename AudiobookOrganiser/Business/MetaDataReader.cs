@@ -1,5 +1,7 @@
 ﻿using AudiobookOrganiser.Models;
 using System;
+using System.Configuration;
+using System.Data.SQLite;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -10,13 +12,14 @@ namespace AudiobookOrganiser.Business
     {
         static readonly char[] _invalidFileNameChars = Path.GetInvalidFileNameChars();
 
-        public static MetaData GetMetaData(
+        public static AudiobookMetaData GetMetaData(
             string audioFile,
             bool tryParseMetaFromPath,
             bool small,
             string libraryRootPath = null)
         {
-            var metaData = new MetaData();
+            var metaData = new AudiobookMetaData();
+            metaData = GetMetaFromReadarr(metaData, audioFile);
 
             metaData = GetMetaDataByTags(metaData, audioFile, small);
 
@@ -112,8 +115,8 @@ namespace AudiobookOrganiser.Business
             return newFilename;
         }
 
-        private static MetaData GetMetaDataByTags(
-            MetaData metaData,
+        private static AudiobookMetaData GetMetaDataByTags(
+            AudiobookMetaData metaData,
             string audioFilePath,
             bool small)
         {
@@ -277,6 +280,34 @@ namespace AudiobookOrganiser.Business
                                         .Replace("  ", " ")
                                         .Trim();
 
+            if (string.IsNullOrEmpty(metaData.Series))
+            {
+                string grouping = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Grouping"))?
+                                        .Replace("  ", " ")
+                                        .Trim();
+
+                if (!string.IsNullOrEmpty(grouping))
+                {
+                    var match = Regex.Match(grouping, @"Book \d+");
+                    if (!match.Success)
+                        match = Regex.Match(grouping, @"book \d+");
+
+                    if (match.Success)
+                    {
+                        var book = match.Value;
+
+                        var series = grouping.Replace(book, "").Replace(",", "").Trim();
+                        var bookNo = book.Replace("Book", "").Replace("book", "").Trim();
+
+                        if (!string.IsNullOrEmpty(series))
+                            metaData.Series = series;
+
+                        if (!string.IsNullOrEmpty(bookNo))
+                            metaData.SeriesPart = bookNo;
+                    }
+                }
+            }
+
             /*
              * Genre
              */
@@ -411,7 +442,7 @@ namespace AudiobookOrganiser.Business
             return metaData;
         }
 
-        private static MetaData GetMetaDataByParsingFilePath(MetaData metaData, string libraryRootPath, string audioFilePath)
+        private static AudiobookMetaData GetMetaDataByParsingFilePath(AudiobookMetaData metaData, string libraryRootPath, string audioFilePath)
         {
             string[] directories = audioFilePath.Replace(libraryRootPath, "").Split(Path.DirectorySeparatorChar);
 
@@ -567,6 +598,18 @@ namespace AudiobookOrganiser.Business
                 }
             }
 
+            if (string.IsNullOrEmpty(metaData.SeriesPart))
+            {
+                var match = Regex.Match(audioFilePath, @"Book \d+");
+                if (match.Success)
+                {
+                    string bookNoStr = match.Value.Trim();
+                    string bookNo = bookNoStr.Replace("Book ", "").Replace("book", "").Trim();
+
+                    metaData.SeriesPart = bookNo;
+                }
+            }
+
             if (string.IsNullOrEmpty(metaData.Year))
             {
                 var matches = Regex.Matches(audioFilePath, @"\d+");
@@ -582,6 +625,121 @@ namespace AudiobookOrganiser.Business
             }
 
             return metaData;
+        }
+
+        private static AudiobookMetaData GetMetaFromReadarr(
+            AudiobookMetaData metaData,
+            string audioFilePath)
+        {
+            string readarrRoot = null;
+
+            try
+            {
+                readarrRoot = ConfigurationManager.AppSettings["ReadarrAppDataRoute"];
+            }
+            catch { }
+
+            if (string.IsNullOrWhiteSpace(readarrRoot))
+                readarrRoot = @"C:\ProgramData\Readarr";
+
+            var dbFiles = Directory.GetFiles(readarrRoot, "*.db", SearchOption.TopDirectoryOnly).ToList();
+            dbFiles = dbFiles.OrderByDescending(m => new FileInfo(m).LastWriteTime).ToList();
+
+            var dbFile = dbFiles.Where(m => Path.GetFileName(m).ToLower().Contains("readarr")).FirstOrDefault();
+
+            using (var connection = new SQLiteConnection($"Data Source=\"{dbFile}\""))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+                command.CommandText =
+                @"
+                    SELECT
+	                    b.ReleaseDate,
+	                    b.Genres,
+	                    e.Isbn13,
+	                    e.Asin,
+	                    e.Title,
+	                    e.Overview,
+	                    e.Format,
+	                    e.Images,
+	                    bf.Path,
+	                   	am.Name AS Author,
+	                    am.NameLastFirst AS AuthorLastFirst,
+	                    s.Title AS Series,
+	                    sbl.Position As SeriesPart
+                    FROM Books b
+	                    LEFT JOIN Editions e
+		                    ON e.BookId = b.Id
+	                    LEFT JOIN BookFiles bf
+		                    ON bf.EditionId = e.Id
+	                    LEFT JOIN SeriesBookLink sbl
+		                    ON sbl.BookId = b.Id
+	                    LEFT JOIN Series s
+		                    ON s.Id = sbl.SeriesId
+	                    LEFT JOIN AuthorMetadata am
+		                    ON am.Id = b.AuthorMetadataId
+                    WHERE (IsEbook = 0
+                    AND     Format <> 'Paperback'
+                    AND     b.Title LIKE '%" + metaData.Title + @"%'
+                    AND   (am.Name LIKE '%" + metaData.Author + @"%') 
+	                    OR am.NameLastFirst LIKE '%" + metaData.Author + @"%')
+                    OR bf.Path = '" + audioFilePath + @"
+                    ORDER BY bf.Path DESC
+                    LIMIT 1'
+                ";
+
+                using (var reader = command.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        if (reader.HasRows)
+                        {
+                            if (string.IsNullOrEmpty(metaData.Author))
+                                metaData.Author = reader["Author"].ToString();
+
+                            if (string.IsNullOrEmpty(metaData.Title))
+                                metaData.Title = reader["Title"].ToString();
+
+                            if (string.IsNullOrEmpty(metaData.Genre))
+                                metaData.Genre = FormatJsonGenres(reader["Genres"].ToString());
+
+                            if (string.IsNullOrEmpty(metaData.Series))
+                                metaData.Series = reader["Series"].ToString();
+
+                            if (string.IsNullOrEmpty(metaData.SeriesPart))
+                                metaData.SeriesPart = reader["SeriesPart"].ToString();
+
+                            if (string.IsNullOrEmpty(metaData.Year))
+                            {
+                                try
+                                {
+                                    metaData.Year = DateTime.Parse(reader["ReleaseDate"].ToString()).ToString("yyyy");
+                                }
+                                catch { }
+                            }
+
+                            if (string.IsNullOrEmpty(metaData.Asin))
+                                metaData.Asin = reader["Asin"].ToString();
+                        }
+                    }
+                }
+            }
+
+            return metaData;
+        }
+
+        private static string FormatJsonGenres(string genres)
+        {
+            genres = genres.Replace("[", "")
+                           .Replace("]", "")
+                           .Replace("\r", "")
+                           .Replace("\n", "")
+                           .Replace("\"", "")
+                           .Replace("-", " ")
+                           .Replace("  ", " ");
+
+            return genres;
         }
     }
 }

@@ -219,7 +219,7 @@ namespace AudiobookOrganiser.Business.Tasks
                                         conversionOptions,
                                         cancelToken)).Wait();
 
-                                    AlterMetaDataOfConvertedFile(newPath, audibleBookProperties);
+                                    MetaDataWriter.WriteMetaData(newPath, audibleBookProperties);
                                     CopyPdf(audioFile, newPath);
                                 }
                             }
@@ -275,28 +275,6 @@ namespace AudiobookOrganiser.Business.Tasks
                 conversionOptions.AudibleKey = keyAndIv.Key;
                 conversionOptions.AudibleIv = keyAndIv.Iv;
             }
-        }
-
-        private static void AlterMetaDataOfConvertedFile(string filePath, AudibleLibrary.Property audibleLibraryProperties)
-        {
-            Track track = new Track(filePath);
-
-            track.Composer = audibleLibraryProperties.narrators;
-            track.Genre = "Audiobook";
-
-            if (!string.IsNullOrWhiteSpace(audibleLibraryProperties.series_title))
-            {
-                track.Group = $"Book {audibleLibraryProperties.series_sequence}, {audibleLibraryProperties.series_title}";
-                track.AdditionalFields["----:com.apple.iTunes:SERIES"] = audibleLibraryProperties.series_title;
-                track.AdditionalFields["----:com.apple.iTunes:SERIES-PART"] = audibleLibraryProperties.series_sequence;
-            }
-
-            track.Title = audibleLibraryProperties.title.Replace("(Unabridged)", "").Trim();
-            track.AdditionalFields["----:com.apple.iTunes:NRT"] = audibleLibraryProperties.narrators;
-            track.AdditionalFields["----:com.apple.iTunes:book_genre"] = audibleLibraryProperties.genres;
-            track.AdditionalFields["ASIN"] = audibleLibraryProperties.asin;
-
-            track.Save();
         }
 
         private static void CopyBooksToLibraryFolder()

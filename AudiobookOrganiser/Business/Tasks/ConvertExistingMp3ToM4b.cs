@@ -65,7 +65,7 @@ namespace AudiobookOrganiser.Business.Tasks
                             if (File.Exists(m4bMediaFile.FileInfo.FullName) &&
                                 new FileInfo(m4bMediaFile.FileInfo.FullName).Length > 10)
                             {
-                                SetMetaDat(m4bMediaFile.FileInfo.FullName, mp3MetaTags);
+                                MetaDataWriter.WriteMetaData(m4bMediaFile.FileInfo.FullName, mp3MetaTags);
 
                                 try
                                 {
@@ -87,31 +87,7 @@ namespace AudiobookOrganiser.Business.Tasks
                     }
                 }
             }
-        }
-
-        private static void SetMetaDat(string filePath, Models.MetaData mp3MetaData)
-        {
-            Track track = new Track(filePath);
-
-            track.Composer = mp3MetaData.Narrator;
-            track.Artist = mp3MetaData.Author;
-            track.AlbumArtist = mp3MetaData.Author;
-            track.Genre = "Audiobook";
-
-            if (!string.IsNullOrWhiteSpace(mp3MetaData.Series))
-            {
-                track.Group = $"Book {mp3MetaData.SeriesPart}, {mp3MetaData.Series}";
-                track.AdditionalFields["----:com.apple.iTunes:SERIES"] = mp3MetaData.Series;
-                track.AdditionalFields["----:com.apple.iTunes:SERIES-PART"] = mp3MetaData.SeriesPart;
-            }
-
-            track.Title = mp3MetaData.Title.Replace("(Unabridged)", "").Trim();
-            track.AdditionalFields["----:com.apple.iTunes:NRT"] = mp3MetaData.Narrator;
-            track.AdditionalFields["----:com.apple.iTunes:book_genre"] = mp3MetaData.Genre;
-            track.AdditionalFields["ASIN"] = mp3MetaData.Asin;
-
-            track.Save();
-        }
+        }       
 
         private static void OnFfMpegProgress(object sender, ConversionProgressEventArgs e)
         {
