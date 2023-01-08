@@ -61,9 +61,7 @@ namespace AudiobookOrganiser.Business
             }
 
             if (!string.IsNullOrWhiteSpace(metaData.Asin))
-            {
                 tagLib.Tag.AmazonId = metaData.Asin;
-            }
 
             if (!string.IsNullOrWhiteSpace(metaData.Year))
             {
