@@ -85,6 +85,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Business\MetaDataWriter.cs" />
+    <Compile Include="Business\Tasks\CheckAndRewriteTags.cs" />
     <Compile Include="Business\Tasks\ConvertExistingMp3ToM4b.cs" />
     <Compile Include="Helpers\FileTypes.cs" />
     <Compile Include="Helpers\LibraryPathHelper.cs" />
@@ -172,6 +173,7 @@
     </Compile>
     <Compile Include="Models\AudibleLibrary.cs" />
     <Compile Include="Models\MetaData.cs" />
+    <Compile Include="Models\OpenAudibleBook.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

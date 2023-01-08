@@ -32,6 +32,7 @@ namespace AudiobookOrganiser
 
                 SyncFromOpenAudibleDownloads.Run();
                 ConvertExistingMp3ToM4b.Run();
+                CheckAndRewriteTags.Run();
 
                 ConsoleEx.WriteColoured(ConsoleColor.Green, "\n\nDONE!");
 
@@ -44,6 +45,10 @@ namespace AudiobookOrganiser
             = ConfigurationManager.AppSettings["LibraryRootPaths"].Trim().Split(';');
         internal static string OpenAudibleDownloadsFolderMp3Path { get; set; }
             = ConfigurationManager.AppSettings["OpenAudibleDownloadsFolderMp3Path"].Trim();
+        internal static string OpenAudibleDownloadsFolderM4bPath { get; set; }
+            = ConfigurationManager.AppSettings["OpenAudibleDownloadsFolderM4bPath"].Trim();
+        internal static string OpenAudibleBookListPath { get; set; }
+            = ConfigurationManager.AppSettings["OpenAudibleBookListPath"].Trim();
         internal static bool SyncFromOpenAudibleDownloadsFolder { get; set; }
             = ConfigurationManager.AppSettings["SyncFromOpenAudibleDownloadsFolder"].Trim().ToLower().In("yes", "true");
         internal static string OutputDirectoryName { get; set; }

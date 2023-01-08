@@ -207,7 +207,7 @@ namespace AudiobookOrganiser.Business.Tasks
 
                                 ResolveAudibleFileDecryptionCodes(audioFile, ref conversionOptions);
 
-                                var metaData = MetaDataReader.GetMetaData(audioFile, false, false, null);
+                                var metaData = MetaDataReader.GetMetaData(audioFile, false, true, true, false, null);
                                 var audibleBookProperties = audibleLibrary.Where(m => m.asin == metaData.Asin)?.FirstOrDefault();
 
                                 if (audibleBookProperties != null)
@@ -295,7 +295,7 @@ namespace AudiobookOrganiser.Business.Tasks
                     var mediaInfo = new MediaInfoLib.MediaInfo();
                     mediaInfo.Option(audioFile);
 
-                    var metaData = MetaDataReader.GetMetaData(audioFile, false, false, null);
+                    var metaData = MetaDataReader.GetMetaData(audioFile, false, false, false, false, null);
 
                     string copyToPath = Path.Combine(
                         LibraryPathHelper.DetermineLibraryPath(metaData),

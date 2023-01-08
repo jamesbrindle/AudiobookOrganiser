@@ -23,7 +23,10 @@ namespace AudiobookOrganiser.Business.Tasks
                 {
                     try
                     {
-                        var metaData = MetaDataReader.GetMetaData(audioFilePath, true, false, libraryRootPath);
+                        if (audioFilePath.Contains("Mythos"))
+                            Console.Write("wiat here");
+
+                        var metaData = MetaDataReader.GetMetaData(audioFilePath, true, true, true, false, libraryRootPath);
 
                         if (!string.IsNullOrEmpty(metaData.Author) && !string.IsNullOrEmpty(metaData.Title))
                         {
@@ -52,7 +55,7 @@ namespace AudiobookOrganiser.Business.Tasks
 
                             if (newFilename.Length > 255)
                             {
-                                metaData = MetaDataReader.GetMetaData(audioFilePath, true, true, libraryRootPath);
+                                metaData = MetaDataReader.GetMetaData(audioFilePath, true, true, true, true, libraryRootPath);
 
                                 newFilename = Path.Combine(
                                     outputDirectory,

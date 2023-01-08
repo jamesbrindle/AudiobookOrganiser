@@ -1,5 +1,6 @@
 ﻿using AudiobookOrganiser.Models;
 using System;
+using System.IO;
 using System.Linq;
 
 namespace AudiobookOrganiser.Helpers
@@ -9,17 +10,7 @@ namespace AudiobookOrganiser.Helpers
         public static string DetermineLibraryPath(AudiobookMetaData metaData)
         {
             if (string.IsNullOrWhiteSpace(metaData.Genre))
-                return Program.LibraryRootPaths.Where(l => l == "Fiction").FirstOrDefault();
-
-            if (metaData.Genre.StringContainsIn(
-                "comedy",
-                "stand-up",
-                "stand up",
-                "humour"))
-
-            {
-                return Program.LibraryRootPaths.Where(l => l.StringContainsIn("Comedy")).FirstOrDefault();
-            }
+                return Program.LibraryRootPaths.Where(l => l.Contains("Fiction") && !l.Contains("Non-Fiction")).FirstOrDefault();           
 
             else if (metaData.Genre.StringContainsIn(
                 "fiction",
@@ -32,6 +23,16 @@ namespace AudiobookOrganiser.Helpers
                 "fantasy"))
             {
                 return Program.LibraryRootPaths.Where(l => l.Contains("\\Fiction")).FirstOrDefault();
+            }
+
+            if (metaData.Genre.StringContainsIn(
+               "comedy",
+               "stand-up",
+               "stand up",
+               "humour"))
+
+            {
+                return Program.LibraryRootPaths.Where(l => l.StringContainsIn("Comedy")).FirstOrDefault();
             }
 
             return Program.LibraryRootPaths.Where(l => l.StringContainsIn("Non-Fiction")).FirstOrDefault();

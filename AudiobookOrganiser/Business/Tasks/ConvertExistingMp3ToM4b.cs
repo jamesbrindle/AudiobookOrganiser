@@ -18,13 +18,13 @@ namespace AudiobookOrganiser.Business.Tasks
 
         internal static void Run()
         {
-            ConsoleEx.WriteColouredLine(ConsoleColor.Yellow, "Converting and retagging existing MP3 to M4B...\n");
+            ConsoleEx.WriteColouredLine(ConsoleColor.Yellow, "\nConverting and retagging existing MP3 to M4B...\n");
 
             _mainRootDir = new DirectoryInfo(Program.LibraryRootPaths[0]).Parent.FullName;
 
             foreach (var mp3AudioFile in Directory.GetFiles(_mainRootDir, "*.mp3", SearchOption.AllDirectories))
             {
-                var mp3MetaTags = MetaDataReader.GetMetaData(mp3AudioFile, true, false, Path.GetDirectoryName(mp3AudioFile));
+                var mp3MetaTags = MetaDataReader.GetMetaData(mp3AudioFile, true, true, true, false, Path.GetDirectoryName(mp3AudioFile));
 
                 if (!string.IsNullOrEmpty(mp3MetaTags.Author) && !string.IsNullOrEmpty(mp3MetaTags.Title))
                 {
