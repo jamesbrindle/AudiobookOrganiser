@@ -94,7 +94,7 @@ namespace AudiobookOrganiser.Business
                 if (!string.IsNullOrEmpty(metaData.Author) && !string.IsNullOrEmpty(metaData.Title))
                 {
                     newFilename =
-                        (string.IsNullOrEmpty(metaData.Author) ? "" : (metaData.Author + "\\")) +
+                        (string.IsNullOrEmpty(metaData.Author) ? "" : (metaData.Author.Split(',')?[0].Trim() + "\\")) +
                         (string.IsNullOrEmpty(metaData.Series) ? "" : (metaData.Series + "\\")) +
                         (string.IsNullOrEmpty(metaData.SeriesPart)
                                 ? ""
@@ -120,7 +120,7 @@ namespace AudiobookOrganiser.Business
                         metaData = GetMetaData(audioFilePath, true, true, true, true, null);
 
                         newFilename =
-                            (string.IsNullOrEmpty(metaData.Author) ? "" : (metaData.Author + "\\")) +
+                            (string.IsNullOrEmpty(metaData.Author) ? "" : (metaData.Author.Split(',')?[0].Trim() + "\\")) +
                             (string.IsNullOrEmpty(metaData.Series) ? "" : (metaData.Series + "\\")) +
                             (string.IsNullOrEmpty(metaData.SeriesPart)
                                     ? ""

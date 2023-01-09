@@ -220,7 +220,7 @@ namespace AudiobookOrganiser.Business.Tasks
                                         cancelToken)).Wait();
 
                                     MetaDataWriter.WriteMetaData(newPath, audibleBookProperties);
-                                    CopyPdf(audioFile, newPath);
+                                    CopyPdf(audioFile, newPath, false);
                                 }
                             }
                         }
@@ -229,22 +229,38 @@ namespace AudiobookOrganiser.Business.Tasks
             }
         }
 
-        private static void CopyPdf(string originalFilePath, string copyToFilePath)
+        private static void CopyPdf(string originalFilePath, string copyToFilePath, bool copyingToLibraryFolder)
         {
             try
             {
                 string originalPdfName;
                 string copyPdfName;
 
-                if (Path.GetExtension(originalFilePath).ToLower() == ".aaxc")
+                if (!copyingToLibraryFolder)
                 {
-                    originalPdfName = Path.GetFileNameWithoutExtension(originalFilePath).Substring(0, Path.GetFileNameWithoutExtension(originalFilePath).IndexOf("-AAX_")) + ".pdf";
-                    copyPdfName = Path.GetFileNameWithoutExtension(copyToFilePath).Substring(0, Path.GetFileNameWithoutExtension(copyToFilePath).IndexOf("-AAX_")) + ".pdf";
+                    if (Path.GetFileNameWithoutExtension(originalFilePath).Contains("-AAX_"))
+                    {
+                        originalPdfName = Path.GetFileNameWithoutExtension(originalFilePath).Substring(0, Path.GetFileNameWithoutExtension(originalFilePath).IndexOf("-AAX_")) + ".pdf";
+                        copyPdfName = Path.GetFileNameWithoutExtension(copyToFilePath).Substring(0, Path.GetFileNameWithoutExtension(copyToFilePath).IndexOf("-AAX_")) + ".pdf";
+                    }
+                    else
+                    {
+                        originalPdfName = Path.GetFileNameWithoutExtension(originalFilePath).Substring(0, Path.GetFileNameWithoutExtension(originalFilePath).IndexOf("-LC_")) + ".pdf";
+                        copyPdfName = Path.GetFileNameWithoutExtension(copyToFilePath).Substring(0, Path.GetFileNameWithoutExtension(copyToFilePath).IndexOf("-LC_")) + ".pdf";
+                    }
                 }
                 else
                 {
-                    originalPdfName = Path.GetFileNameWithoutExtension(originalFilePath).Substring(0, Path.GetFileNameWithoutExtension(originalFilePath).IndexOf("-LC_")) + ".pdf";
-                    copyPdfName = Path.GetFileNameWithoutExtension(copyToFilePath).Substring(0, Path.GetFileNameWithoutExtension(copyToFilePath).IndexOf("-LC_")) + ".pdf";
+                    if (Path.GetFileNameWithoutExtension(originalFilePath).Contains("-AAX_"))
+                    {
+                        originalPdfName = Path.GetFileNameWithoutExtension(originalFilePath).Substring(0, Path.GetFileNameWithoutExtension(originalFilePath).IndexOf("-AAX_")) + ".pdf";
+                        copyPdfName = Path.GetFileNameWithoutExtension(copyToFilePath) + ".pdf";
+                    }
+                    else
+                    {
+                        originalPdfName = Path.GetFileNameWithoutExtension(originalFilePath).Substring(0, Path.GetFileNameWithoutExtension(originalFilePath).IndexOf("-LC_")) + ".pdf";
+                        copyPdfName = Path.GetFileNameWithoutExtension(copyToFilePath) + ".pdf";
+                    }
                 }
 
                 string originalPdfPath = Path.Combine(Path.GetDirectoryName(originalFilePath), originalPdfName);
@@ -256,7 +272,10 @@ namespace AudiobookOrganiser.Business.Tasks
                     File.Copy(originalPdfPath, copyPdfPath);
                 }
             }
-            catch { }
+            catch (Exception e)
+            {
+                Console.Out.WriteLine(e.Message);
+            }
         }
 
         private static void ResolveAudibleFileDecryptionCodes(string filePath, ref ConversionOptions conversionOptions)
@@ -309,7 +328,7 @@ namespace AudiobookOrganiser.Business.Tasks
                     if (!File.Exists(copyToPath))
                         File.Copy(audioFile, copyToPath);
 
-                    CopyPdf(audioFile, copyToPath);
+                    CopyPdf(audioFile, copyToPath, true);
                 }
                 catch { }
             });

@@ -19,7 +19,7 @@ namespace AudiobookOrganiser.Business.Tasks
             var audioFiles = Directory.GetFiles(libraryRootPath, "*.*", SearchOption.AllDirectories);
             foreach (var audioFilePath in audioFiles.Where(a => !a.ToLower().Contains(outputDirectory)))
             {
-                if (Path.GetExtension(audioFilePath).ToLower().In(".mp3", ".m4a", ".m4b"))
+                if (Path.GetExtension(audioFilePath).ToLower().In(".mp3", ".m4a", ".m4b", ".flac", ".pdf"))
                 {
                     try
                     {
@@ -32,7 +32,7 @@ namespace AudiobookOrganiser.Business.Tasks
                         {
                             string newFilename = Path.Combine(
                                 outputDirectory,
-                                metaData.Author,
+                                metaData.Author?.Split(',')?[0].Trim(),
                                 metaData.Series,
                                 (string.IsNullOrEmpty(metaData.SeriesPart)
                                         ? ""
@@ -59,7 +59,7 @@ namespace AudiobookOrganiser.Business.Tasks
 
                                 newFilename = Path.Combine(
                                     outputDirectory,
-                                    metaData.Author,
+                                    metaData.Author.Split(',')?[0].Trim(),
                                     metaData.Series,
                                     (string.IsNullOrEmpty(metaData.SeriesPart)
                                             ? ""

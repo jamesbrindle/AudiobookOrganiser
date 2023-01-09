@@ -32,7 +32,7 @@ namespace AudiobookOrganiser.Business.Tasks
                     {
                         string newFilename = Path.Combine(
                             LibraryPathHelper.DetermineLibraryPath(metaData),
-                            metaData.Author,
+                            metaData.Author.Split(',')?[0].Trim(),
                             metaData.Series,
                             (string.IsNullOrEmpty(metaData.SeriesPart)
                                     ? ""
@@ -59,7 +59,7 @@ namespace AudiobookOrganiser.Business.Tasks
 
                             newFilename = Path.Combine(
                                 LibraryPathHelper.DetermineLibraryPath(metaData),
-                                metaData.Author,
+                                metaData.Author.Split(',')?[0].Trim(),
                                 metaData.Series,
                                 (string.IsNullOrEmpty(metaData.SeriesPart)
                                         ? ""
@@ -137,7 +137,7 @@ namespace AudiobookOrganiser.Business.Tasks
                     {
                         string newFilename = Path.Combine(
                             LibraryPathHelper.DetermineLibraryPath(metaData),
-                            metaData.Author,
+                            metaData.Author.Split(',')?[0].Trim(),
                             metaData.Series,
                             (string.IsNullOrEmpty(metaData.SeriesPart)
                                     ? ""
@@ -164,7 +164,7 @@ namespace AudiobookOrganiser.Business.Tasks
 
                             newFilename = Path.Combine(
                                 LibraryPathHelper.DetermineLibraryPath(metaData),
-                                metaData.Author,
+                                metaData.Author.Split(',')?[0].Trim(),
                                 metaData.Series,
                                 (string.IsNullOrEmpty(metaData.SeriesPart)
                                         ? ""
