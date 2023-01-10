@@ -202,7 +202,7 @@ namespace AudiobookOrganiser.Helpers.FfMpegWrapper.AudibleActivationBytesHelper.
     }
 }
 
-namespace ReAlPDFc.Loader.AudibleActivationBytesHelper.Diagn
+namespace AudiobookOrganiser.Helpers.AudibleActivationBytesHelper.Diagn
 {
 
     /// <summary>

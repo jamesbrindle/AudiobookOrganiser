@@ -77,7 +77,7 @@ namespace AudiobookOrganiser.Helpers.FfMpegWrapper
             MediaFile mediaFile,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            return Task.Run(async () => await GetMetaDataAsync(mediaFile, default(CancellationToken))).Result;
+            return Task.Run(async () => await GetMetaDataAsync(mediaFile, cancellationToken)).Result;
         }
 
         /// <summary>
@@ -213,7 +213,14 @@ namespace AudiobookOrganiser.Helpers.FfMpegWrapper
             MediaFile output,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await GetThumbnailAsync(input, output, cancellationToken);
+            return await GetThumbnailAsync(
+                input,
+                output,
+                new GetThumbnailOptions
+                {
+                    HideBanner = true,
+                },
+                cancellationToken);
         }
 
         /// <summary>

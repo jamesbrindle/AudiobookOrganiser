@@ -32,7 +32,7 @@ namespace AudiobookOrganiser.Helpers.FfMpegWrapper
                     return GetMetadata(parameters.InputFile);
 
                 case FfMpegTask.GetThumbnail:
-                    return GetThumbnail(parameters.InputFile, parameters.OutputFile, parameters.ConversionOptions);
+                    return GetThumbnail(parameters.InputFile, parameters.OutputFile, parameters.GetThumbnailOptions);
 
                 case FfMpegTask.SetMetaData:
                     return SetMetaData(parameters.InputFile, parameters.OutputFile, parameters.SetMetaDatOptions);
@@ -70,7 +70,7 @@ namespace AudiobookOrganiser.Helpers.FfMpegWrapper
         private static string GetThumbnail(
             MediaFile inputFile,
             MediaFile outputFile,
-            ConversionOptions conversionOptions)
+            GetThumbnailOptions getThumbnailOptions)
         {
             var defaultTimeSpan = TimeSpan.FromSeconds(1);
             var commandBuilder = new StringBuilder();
@@ -80,22 +80,22 @@ namespace AudiobookOrganiser.Helpers.FfMpegWrapper
                 commandBuilder.AppendFormat(
                     CultureInfo.InvariantCulture,
                     " -ss {0} ",
-                    conversionOptions?.Seek.GetValueOrDefault(defaultTimeSpan).TotalSeconds ?? defaultTimeSpan.TotalSeconds);
+                    getThumbnailOptions?.Seek.GetValueOrDefault(defaultTimeSpan).TotalSeconds ?? defaultTimeSpan.TotalSeconds);
             }
 
             commandBuilder.AppendFormat(" -i \"{0}\" ", inputFile.FileInfo.FullName);
             commandBuilder.AppendFormat(" -vframes {0} ", 1);
 
             // Video size / resolution
-            commandBuilder = AppendVideoSize(commandBuilder, conversionOptions);
+            commandBuilder = AppendVideoSize(commandBuilder, getThumbnailOptions);
 
             // Video aspect ratio
-            commandBuilder = AppendVideoAspectRatio(commandBuilder, conversionOptions);
+            commandBuilder = AppendVideoAspectRatio(commandBuilder, getThumbnailOptions);
 
             // Video cropping
-            commandBuilder = AppendVideoCropping(commandBuilder, conversionOptions);
+            commandBuilder = AppendVideoCropping(commandBuilder, getThumbnailOptions);
 
-            return commandBuilder.AppendFormat(" {0}\"{1}\" ", conversionOptions.Overwrite ? "-y " : "", outputFile.FileInfo.FullName).ToString();
+            return commandBuilder.AppendFormat(" {0}\"{1}\" ", getThumbnailOptions.Overwrite ? "-y " : "", outputFile.FileInfo.FullName).ToString();
         }
 
         private static string Convert(
@@ -450,6 +450,20 @@ namespace AudiobookOrganiser.Helpers.FfMpegWrapper
             return commandBuilder;
         }
 
+        private static StringBuilder AppendVideoCropping(
+           StringBuilder commandBuilder,
+           GetThumbnailOptions getThumbnailOptions)
+        {
+            if (getThumbnailOptions.SourceCrop != null)
+            {
+                var crop = getThumbnailOptions.SourceCrop;
+                commandBuilder.AppendFormat(" -filter:v \"crop={0}:{1}:{2}:{3}\" ", crop.Width, crop.Height, crop.X,
+                    crop.Y);
+            }
+
+            return commandBuilder;
+        }
+
         private static StringBuilder AppendVideoAspectRatio(
             StringBuilder commandBuilder,
             ConversionOptions conversionOptions)
@@ -457,6 +471,22 @@ namespace AudiobookOrganiser.Helpers.FfMpegWrapper
             if (conversionOptions.VideoAspectRatio != VideoAspectRatio.Default)
             {
                 var ratio = conversionOptions.VideoAspectRatio.ToString();
+                ratio = ratio.Substring(1);
+                ratio = ratio.Replace("_", ":");
+
+                commandBuilder.AppendFormat(" -aspect {0} ", ratio);
+            }
+
+            return commandBuilder;
+        }
+
+        private static StringBuilder AppendVideoAspectRatio(
+            StringBuilder commandBuilder,
+            GetThumbnailOptions getThumbnailOptions)
+        {
+            if (getThumbnailOptions.VideoAspectRatio != VideoAspectRatio.Default)
+            {
+                var ratio = getThumbnailOptions.VideoAspectRatio.ToString();
                 ratio = ratio.Substring(1);
                 ratio = ratio.Replace("_", ":");
 
@@ -490,6 +520,32 @@ namespace AudiobookOrganiser.Helpers.FfMpegWrapper
 
             return commandBuilder;
         }
+
+        private static StringBuilder AppendVideoSize(
+            StringBuilder commandBuilder,
+            GetThumbnailOptions getThumbnaulOptions)
+        {
+            if (getThumbnaulOptions.VideoSize == VideoSize.Custom)
+            {
+                commandBuilder.AppendFormat(
+                    " -vf \"scale={0}:{1}\" ",
+                    getThumbnaulOptions.CustomWidth ?? -2,
+                    getThumbnaulOptions.CustomHeight ?? -2);
+            }
+            else if (getThumbnaulOptions.VideoSize != VideoSize.Default)
+            {
+                var size = getThumbnaulOptions.VideoSize.ToString().ToLowerInvariant();
+                if (size.StartsWith("_"))
+                    size = size.Replace("_", "");
+                if (size.Contains("_"))
+                    size = size.Replace("_", "-");
+
+                commandBuilder.AppendFormat(" -s {0} ", size);
+            }
+
+            return commandBuilder;
+        }
+
 
         private static StringBuilder AppendCodec(
            StringBuilder commandBuilder,
