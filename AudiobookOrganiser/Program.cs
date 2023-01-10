@@ -50,7 +50,7 @@ namespace AudiobookOrganiser
         internal static string OpenAudibleBookListPath { get; set; }
             = ConfigurationManager.AppSettings["OpenAudibleBookListPath"].Trim();
         internal static bool SyncFromOpenAudibleDownloadsFolder { get; set; }
-            = ConfigurationManager.AppSettings["SyncFromOpenAudibleDownloadsFolder"].Trim().ToLower().In("yes", "true");
+            = ConfigurationManager.AppSettings["SyncFromOpenAudibleDownloadsFolder"].Trim().ToLower().In("yes", "true", "1");
         internal static string OutputDirectoryName { get; set; }
             = ConfigurationManager.AppSettings["OutputDirectoryName"].Trim();
         internal static string AudibleCliSyncPath { get; set; }
@@ -59,5 +59,7 @@ namespace AudiobookOrganiser
             = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "ffmpeg.exe");
         internal static string FfProbePath { get; set; }
             = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "ffprobe.exe");
+        internal static bool LibFDK_AAC_EncodingEnabled { get; set; }
+           = ConfigurationManager.AppSettings["LibFDK_AAC_EncodingEnabled"].Trim().ToLower().In("yes", "true", "1");
     }
 }

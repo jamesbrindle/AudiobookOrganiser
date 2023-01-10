@@ -1,7 +1,7 @@
 ﻿using ATL;
 using AudiobookOrganiser.Helpers;
-using FfMpeg;
-using FfMpeg.Events;
+using AudiobookOrganiser.Helpers.FfMpegWrapper;
+using AudiobookOrganiser.Helpers.FfMpegWrapper.Events;
 using System;
 using System.IO;
 using System.Threading;
@@ -42,15 +42,15 @@ namespace AudiobookOrganiser.Business.Tasks
                             var conversionOptions = new ConversionOptions
                             {
                                 Overwrite = false,
-                                Codec = FfMpeg.Enums.Codec.libfdk_aac,
-                                Format = FfMpeg.Enums.Format.m4b,
+                                Codec = AudiobookOrganiser.Helpers.FfMpegWrapper.Enums.Codec.libfdk_aac,
+                                Format = AudiobookOrganiser.Helpers.FfMpegWrapper.Enums.Format.m4b,
                                 RemoveVideo = true,
                                 AudioBitRate = new Track(mp3AudioFile).Bitrate
                             };
 
                             _progress = new ProgressBar();
 
-                            var ffEngine = new Engine(Program.FfMpegPath);
+                            var ffEngine = new FfMpeg(Program.FfMpegPath, Program.LibFDK_AAC_EncodingEnabled);
                             ffEngine.Progress += OnFfMpegProgress;
                             ffEngine.Error += OnFfMpegError;
                             ffEngine.Complete += OnFfMpegComplete;
@@ -87,7 +87,7 @@ namespace AudiobookOrganiser.Business.Tasks
                     }
                 }
             }
-        }       
+        }
 
         private static void OnFfMpegProgress(object sender, ConversionProgressEventArgs e)
         {

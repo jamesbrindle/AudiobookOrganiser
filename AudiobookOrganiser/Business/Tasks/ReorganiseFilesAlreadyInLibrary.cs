@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AudiobookOrganiser.Helpers;
+using System;
 using System.IO;
 using System.Linq;
 using static System.Extensions;
@@ -165,13 +166,13 @@ namespace AudiobookOrganiser.Business.Tasks
 
                 try
                 {
-                    Directory.Move(
+                    LibraryPathHelper.MoveDirectory(
                         directory,
                         Path.Combine(libraryRootPath, new DirectoryInfo(directory).Name));
                 }
-                catch
+                catch(Exception e)
                 {
-                    ConsoleEx.WriteColouredLine(ConsoleColor.Red, $"Could not move file: {directory}");
+                    ConsoleEx.WriteColouredLine(ConsoleColor.Red, $"Could not move file: {directory}: ({e.Message})");
                 }
             }
 

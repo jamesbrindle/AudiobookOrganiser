@@ -1,14 +1,13 @@
-﻿using ATL;
-using AudiobookOrganiser.Helpers;
+﻿using AudiobookOrganiser.Helpers;
 using AudiobookOrganiser.Models;
-using FfMpeg;
+using AudiobookOrganiser.Helpers.FfMpegWrapper;
+using AudiobookOrganiser.Helpers.FfMpegWrapper.Extensions;
 using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static FfMpeg.Extensions.AaxActivationClient;
 using static System.Extensions;
 
 namespace AudiobookOrganiser.Business.Tasks
@@ -197,11 +196,11 @@ namespace AudiobookOrganiser.Business.Tasks
                                 var cancelToken = cancelTokenSource.Token;
                                 var conversionOptions = new ConversionOptions
                                 {
-                                    Format = FfMpeg.Enums.Format.m4b,
+                                    Format = AudiobookOrganiser.Helpers.FfMpegWrapper.Enums.Format.m4b,
                                     HideBanner = true,
                                     Copy = true,
                                     HWAccelOutputFormatCopy = true,
-                                    Codec = FfMpeg.Enums.Codec.copy,
+                                    Codec = AudiobookOrganiser.Helpers.FfMpegWrapper.Enums.Codec.copy,
                                     Overwrite = true
                                 };
 
@@ -212,7 +211,7 @@ namespace AudiobookOrganiser.Business.Tasks
 
                                 if (audibleBookProperties != null)
                                 {
-                                    var engine = new Engine(Program.FfMpegPath);
+                                    var engine = new FfMpeg(Program.FfMpegPath, Program.LibFDK_AAC_EncodingEnabled);
                                     Task.Run(() => engine.ConvertAsync(
                                         new MediaFile(audioFile),
                                         new MediaFile(newPath),
@@ -282,13 +281,13 @@ namespace AudiobookOrganiser.Business.Tasks
         {
             if (Path.GetExtension(filePath).ToLower() == ".aax") // Audible file 
             {
-                conversionOptions.ActivationBytes = GetActivationBytes(filePath, out string _);
+                conversionOptions.ActivationBytes = new AaxActivationClient(Program.FfProbePath).GetActivationBytes(filePath, out string _);
                 conversionOptions.AudibleKey = null;
                 conversionOptions.AudibleIv = null;
             }
             else if (Path.GetExtension(filePath).ToLower() == ".aaxc") // Audible file
             {
-                var keyAndIv = GetAudibleKeyAndIv(Path.ChangeExtension(filePath, ".voucher"), out string _);
+                var keyAndIv = new AaxActivationClient(Program.FfProbePath).GetAudibleKeyAndIv(Path.ChangeExtension(filePath, ".voucher"), out string _);
 
                 conversionOptions.ActivationBytes = null;
                 conversionOptions.AudibleKey = keyAndIv.Key;
