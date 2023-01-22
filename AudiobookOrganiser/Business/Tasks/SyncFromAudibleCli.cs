@@ -299,6 +299,12 @@ namespace AudiobookOrganiser.Business.Tasks
         {
             ConsoleEx.WriteColouredLine(ConsoleColor.White, "Copying to library folder...");
 
+#if DEBUG
+            int maxDegreeOfParallelism = 1;
+#else
+            int maxDegreeOfParallelism = 4;
+#endif
+
             Parallel.ForEach(
                    Directory.GetFiles(
                         Path.Combine(
@@ -306,7 +312,7 @@ namespace AudiobookOrganiser.Business.Tasks
                             "Converted"),
                             "*.m4b",
                             SearchOption.AllDirectories).AsParallel(),
-                   new ParallelOptions { MaxDegreeOfParallelism = 4 }, audioFile =>
+                   new ParallelOptions { MaxDegreeOfParallelism = maxDegreeOfParallelism }, audioFile =>
             {
                 try
                 {
