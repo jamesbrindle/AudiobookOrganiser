@@ -316,9 +316,6 @@ namespace AudiobookOrganiser.Business.Tasks
             {
                 try
                 {
-                    var mediaInfo = new MediaInfoLib.MediaInfo();
-                    mediaInfo.Option(audioFile);
-
                     var metaData = MetaDataReader.GetMetaData(audioFile, false, false, false, false, null);
 
                     string copyToPath = Path.Combine(
@@ -331,7 +328,12 @@ namespace AudiobookOrganiser.Business.Tasks
                         File.Delete(mp3Path);
 
                     if (!File.Exists(copyToPath))
+                    {
+                        if (!Directory.Exists(Path.GetDirectoryName(copyToPath)))
+                            Directory.CreateDirectory(Path.GetDirectoryName(copyToPath));
+
                         File.Copy(audioFile, copyToPath);
+                    }
 
                     CopyPdf(audioFile, copyToPath, true);
                 }

@@ -89,6 +89,7 @@
     <Compile Include="Business\MetaDataWriter.cs" />
     <Compile Include="Business\Tasks\CheckAndRewriteTags.cs" />
     <Compile Include="Business\Tasks\ConvertExistingMp3ToM4b.cs" />
+    <Compile Include="Helpers\DbHelper.cs" />
     <Compile Include="Helpers\FfMpegWrapper\CombineOptions.cs" />
     <Compile Include="Helpers\FfMpegWrapper\ConcatenationOptions.cs" />
     <Compile Include="Helpers\FfMpegWrapper\ConversionOptions.cs" />
@@ -175,6 +176,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Helpers\ProcessHelper.cs" />
     <Compile Include="Helpers\ProgressBar.cs" />
+    <Compile Include="Helpers\SafeFileStream.cs" />
     <Compile Include="MediaInfoDLL.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>

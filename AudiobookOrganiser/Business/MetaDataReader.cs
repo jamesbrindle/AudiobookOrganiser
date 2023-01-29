@@ -676,23 +676,7 @@ namespace AudiobookOrganiser.Business
             AudiobookMetaData metaData,
             string audioFilePath)
         {
-            string readarrRoot = null;
-
-            try
-            {
-                readarrRoot = ConfigurationManager.AppSettings["ReadarrAppDataRoute"];
-            }
-            catch { }
-
-            if (string.IsNullOrWhiteSpace(readarrRoot))
-                readarrRoot = @"C:\ProgramData\Readarr";
-
-            var dbFiles = Directory.GetFiles(readarrRoot, "*.db", SearchOption.TopDirectoryOnly).ToList();
-            dbFiles = dbFiles.OrderByDescending(m => new FileInfo(m).LastWriteTime).ToList();
-
-            var dbFile = dbFiles.Where(m => Path.GetFileName(m).ToLower().Contains("readarr")).FirstOrDefault();
-
-            using (var connection = new SQLiteConnection($"Data Source=\"{dbFile}\""))
+            using (var connection = new SQLiteConnection($"Data Source=\"{Program.ReadarrDbPath}\""))
             {
                 connection.Open();
 
