@@ -60,6 +60,21 @@ namespace AudiobookOrganiser.Business
                     tagLib.Tag.Grouping = $"{metaData.Series}";
             }
 
+            if (string.IsNullOrWhiteSpace(metaData.AlbumSort))
+            {
+                if (string.IsNullOrEmpty(metaData.Series))
+                {
+                    tagLib.Tag.AlbumSort = metaData.Title;
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(metaData.SeriesPart))
+                        tagLib.Tag.AlbumSort = $"{metaData.Series} {metaData.SeriesPart} - {metaData.Title}";
+                    else
+                        tagLib.Tag.AlbumSort = $"{metaData.Series} - {metaData.Title}";
+                }
+            }
+
             if (!string.IsNullOrWhiteSpace(metaData.Asin))
                 tagLib.Tag.AmazonId = metaData.Asin;
 
@@ -72,8 +87,8 @@ namespace AudiobookOrganiser.Business
                 catch { }
             }
 
-
             tagLib.Save();
+            tagLib.Dispose();
         }
         internal static void WriteMetaData(string audioPath, AudibleLibrary.Property metaData)
         {
@@ -144,6 +159,7 @@ namespace AudiobookOrganiser.Business
             }
 
             tagLib.Save();
+            tagLib.Dispose();
         }
     }
 }

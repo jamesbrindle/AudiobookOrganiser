@@ -20,13 +20,10 @@ namespace AudiobookOrganiser.Business.Tasks
             var audioFiles = Directory.GetFiles(libraryRootPath, "*.*", SearchOption.AllDirectories);
             foreach (var audioFilePath in audioFiles.Where(a => !a.ToLower().Contains(outputDirectory)))
             {
-                if (Path.GetExtension(audioFilePath).ToLower().In(".mp3", ".m4a", ".m4b", ".flac", ".pdf"))
+                if (Path.GetExtension(audioFilePath).ToLower().In(".mp3", ".m4a", ".m4b", ".flac"))
                 {
                     try
                     {
-                        if (audioFilePath.Contains("Mythos"))
-                            Console.Write("wiat here");
-
                         var metaData = MetaDataReader.GetMetaData(audioFilePath, true, true, true, false, libraryRootPath);
 
                         if (!string.IsNullOrEmpty(metaData.Author) && !string.IsNullOrEmpty(metaData.Title))
@@ -120,7 +117,8 @@ namespace AudiobookOrganiser.Business.Tasks
                 {
                     try
                     {
-                        File.Delete(audioFilePath);
+                        if (!Path.GetExtension(audioFilePath).ToLower().In(".pdf"))
+                            File.Delete(audioFilePath);
                     }
                     catch { }
                 }

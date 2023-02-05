@@ -306,6 +306,25 @@ namespace AudiobookOrganiser.Business
                                       .Trim();
 
             /*
+            * Album Sort
+            */
+
+            if (string.IsNullOrEmpty(metaData.AlbumSort))
+                metaData.AlbumSort = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Album_Sort"))?
+                                        .Replace("  ", " ")
+                                        .Trim();
+
+            if (string.IsNullOrEmpty(metaData.AlbumSort))
+                metaData.AlbumSort = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "ALBUMSORT"))?
+                                        .Replace("  ", " ")
+                                        .Trim();
+
+            if (string.IsNullOrEmpty(metaData.AlbumSort))
+                metaData.AlbumSort = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "TSOA"))?
+                                        .Replace("  ", " ")
+                                        .Trim();
+
+            /*
              * Series
              */
 
@@ -364,22 +383,25 @@ namespace AudiobookOrganiser.Business
                                     .Replace("  ", " ")
                                     .Trim();
 
+            if (string.IsNullOrEmpty(metaData.ProperGenre))
+                metaData.ProperGenre = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "genre"))?
+                                    .Replace("  ", " ")
+                                    .Trim();
+
+            if (string.IsNullOrEmpty(metaData.ProperGenre))
+                metaData.ProperGenre = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Genre"))?
+                                    .Replace("  ", " ")
+                                    .Trim();
+
+            if (string.IsNullOrEmpty(metaData.ProperGenre))
+                metaData.ProperGenre = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "GENRE"))?
+                                    .Replace("  ", " ")
+                                    .Trim();
+
             if (getProperGenre)
             {
                 if (string.IsNullOrEmpty(metaData.Genre))
-                    metaData.Genre = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "genre"))?
-                                        .Replace("  ", " ")
-                                        .Trim();
-
-                if (string.IsNullOrEmpty(metaData.Genre))
-                    metaData.Genre = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Genre"))?
-                                        .Replace("  ", " ")
-                                        .Trim();
-
-                if (string.IsNullOrEmpty(metaData.Genre))
-                    metaData.Genre = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "GENRE"))?
-                                        .Replace("  ", " ")
-                                        .Trim();
+                    metaData.Genre = metaData.ProperGenre;
             }
             else
             {
@@ -483,6 +505,16 @@ namespace AudiobookOrganiser.Business
             }
 
             mediaInfo.Close();
+
+            // Fallback
+
+            if (string.IsNullOrEmpty(metaData.AlbumSort))
+            {
+                var tagLib = TagLib.File.Create(audioFilePath);
+                metaData.AlbumSort = tagLib.Tag.AlbumSort;
+
+                tagLib.Dispose();
+            }
 
             return metaData;
         }

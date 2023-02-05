@@ -29,6 +29,8 @@ namespace AudiobookOrganiser.Business.Tasks
                     var metaOnlyFromFile = MetaDataReader.GetMetaData(audioFilePath, false, false, false, false, null, true);
                     var metaFromOtherSources = MetaDataReader.GetMetaData(audioFilePath, true, true, true, false);
 
+                    metaFromOtherSources.ProperGenre = "Audiobook";
+
                     bool hasChanged = false;
 
                     var changedList = new List<string>();
@@ -64,6 +66,18 @@ namespace AudiobookOrganiser.Business.Tasks
                             changedList.Add("Genre");
                             hasChanged = true;
                         }
+                    }
+
+                    if (metaOnlyFromFile.ProperGenre != "Audiobook")
+                    {
+                        changedList.Add("Proper Genre");
+                        hasChanged = true;
+                    }
+
+                    if (string.IsNullOrEmpty(metaOnlyFromFile.AlbumSort))
+                    {
+                        changedList.Add("Album Sort");
+                        hasChanged = true;
                     }
 
                     if (metaOnlyFromFile.Year != metaFromOtherSources.Year)
