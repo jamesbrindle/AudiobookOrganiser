@@ -24,7 +24,7 @@ namespace AudiobookOrganiser
             }
             else if (args.Contains("-update-tags-only"))
             {
-                CheckAndRewriteTags.Run(true);
+                CheckAndRewriteTags.Run();
                 ConsoleEx.WriteColoured(ConsoleColor.Green, "\n\nDONE!");
             }
             else
@@ -37,7 +37,7 @@ namespace AudiobookOrganiser
 
                 SyncFromOpenAudibleDownloads.Run();
                 ConvertExistingMp3ToM4b.Run();
-                CheckAndRewriteTags.Run(true);
+                CheckAndRewriteTags.Run();
 
                 ConsoleEx.WriteColoured(ConsoleColor.Green, "\n\nDONE!");
 

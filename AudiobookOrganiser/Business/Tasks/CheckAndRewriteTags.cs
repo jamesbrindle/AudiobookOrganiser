@@ -7,12 +7,9 @@ namespace AudiobookOrganiser.Business.Tasks
 {
     internal class CheckAndRewriteTags
     {
-        internal static void Run(bool overwriteAll = false)
+        internal static void Run()
         {
-            if (!overwriteAll)
-                ConsoleEx.WriteColouredLine(ConsoleColor.Yellow, "\n\nChecking and rewriting tags...\n\n");
-            else
-                ConsoleEx.WriteColouredLine(ConsoleColor.Yellow, "\n\nOverwriting all tags...\n\n");
+            ConsoleEx.WriteColouredLine(ConsoleColor.Yellow, "\n\nChecking and rewriting tags...\n\n");
 
             var m4bAudioFiles = Directory.GetFiles(
                 new DirectoryInfo(Program.LibraryRootPaths[0]).Parent.FullName,
@@ -20,104 +17,97 @@ namespace AudiobookOrganiser.Business.Tasks
                 SearchOption.AllDirectories);
 
             foreach (var audioFilePath in m4bAudioFiles)
-                PerformCheckAndRewriteTags(audioFilePath, overwriteAll);
+                PerformCheckAndRewriteTags(audioFilePath);
         }
 
-        private static void PerformCheckAndRewriteTags(string audioFilePath, bool overwriteAll)
+        private static void PerformCheckAndRewriteTags(string audioFilePath)
         {
             if (Path.GetExtension(audioFilePath).ToLower().In(".m4b"))
             {
                 try
                 {
-                    var metaOnlyFromFile = MetaDataReader.GetMetaData(audioFilePath, false, false, false, false, null, true, true);
+                    var metaOnlyFromFile = MetaDataReader.GetMetaData(audioFilePath, false, false, false, false, null, true);
                     var metaFromOtherSources = MetaDataReader.GetMetaData(audioFilePath, true, true, true, false, forOverwriting: true);
 
                     metaFromOtherSources.ProperGenre = "Audiobook";
 
-                    if (overwriteAll)
+
+                    bool hasChanged = false;
+                    var changedList = new List<string>();
+
+                    if (metaOnlyFromFile.Title != metaFromOtherSources.Title)
                     {
-                        Console.Write($"{Path.GetFileName(audioFilePath)}\n");
-                        MetaDataWriter.WriteMetaData(audioFilePath, metaFromOtherSources);
+                        changedList.Add("Title");
+                        hasChanged = true;
                     }
-                    else
+
+                    if (string.IsNullOrEmpty(metaOnlyFromFile.Album))
                     {
-                        bool hasChanged = false;
-                        var changedList = new List<string>();
+                        changedList.Add("Album");
+                        hasChanged = true;
+                    }
 
-                        if (metaOnlyFromFile.Title != metaFromOtherSources.Title)
+                    if (string.IsNullOrEmpty(metaOnlyFromFile.AlbumSort))
+                    {
+                        changedList.Add("Album Sort");
+                        hasChanged = true;
+                    }
+
+                    if (metaOnlyFromFile.Author != metaFromOtherSources.Author)
+                    {
+                        changedList.Add("Author");
+                        hasChanged = true;
+                    }
+
+                    if (metaOnlyFromFile.Narrator != metaFromOtherSources.Narrator)
+                    {
+                        changedList.Add("Narrator");
+                        hasChanged = true;
+                    }
+
+                    if (metaOnlyFromFile.Series != metaFromOtherSources.Series)
+                    {
+                        changedList.Add("Series");
+                        hasChanged = true;
+                    }
+
+                    if (metaOnlyFromFile.Overview != metaFromOtherSources.Overview)
+                    {
+                        changedList.Add("Overview");
+                        hasChanged = true;
+                    }
+
+                    if (metaOnlyFromFile.Genre != metaFromOtherSources.Genre)
+                    {
+                        if (metaOnlyFromFile.Genre != "Audiobook")
                         {
-                            changedList.Add("Title");
+                            changedList.Add("Genre");
                             hasChanged = true;
                         }
+                    }
 
-                        if (string.IsNullOrEmpty(metaOnlyFromFile.Album))
-                        {
-                            changedList.Add("Album");
-                            hasChanged = true;
-                        }
+                    if (metaOnlyFromFile.ProperGenre != "Audiobook")
+                    {
+                        changedList.Add("Proper Genre");
+                        hasChanged = true;
+                    }
 
-                        if (string.IsNullOrEmpty(metaOnlyFromFile.AlbumSort))
-                        {
-                            changedList.Add("Album Sort");
-                            hasChanged = true;
-                        }
+                    if (metaOnlyFromFile.Year != metaFromOtherSources.Year)
+                    {
+                        changedList.Add("Year");
+                        hasChanged = true;
+                    }
 
-                        if (metaOnlyFromFile.Author != metaFromOtherSources.Author)
-                        {
-                            changedList.Add("Author");
-                            hasChanged = true;
-                        }
+                    if (metaOnlyFromFile.Asin != metaFromOtherSources.Asin)
+                    {
+                        changedList.Add("Asin");
+                        hasChanged = true;
+                    }
 
-                        if (metaOnlyFromFile.Narrator != metaFromOtherSources.Narrator)
-                        {
-                            changedList.Add("Narrator");
-                            hasChanged = true;
-                        }
-
-                        if (metaOnlyFromFile.Series != metaFromOtherSources.Series)
-                        {
-                            changedList.Add("Series");
-                            hasChanged = true;
-                        }
-
-                        if (metaOnlyFromFile.Overview != metaFromOtherSources.Overview)
-                        {
-                            changedList.Add("Overview");
-                            hasChanged = true;
-                        }
-
-                        if (metaOnlyFromFile.Genre != metaFromOtherSources.Genre)
-                        {
-                            if (metaOnlyFromFile.Genre != "Audiobook")
-                            {
-                                changedList.Add("Genre");
-                                hasChanged = true;
-                            }
-                        }
-
-                        if (metaOnlyFromFile.ProperGenre != "Audiobook")
-                        {
-                            changedList.Add("Proper Genre");
-                            hasChanged = true;
-                        }
-
-                        if (metaOnlyFromFile.Year != metaFromOtherSources.Year)
-                        {
-                            changedList.Add("Year");
-                            hasChanged = true;
-                        }
-
-                        if (metaOnlyFromFile.Asin != metaFromOtherSources.Asin)
-                        {
-                            changedList.Add("Asin");
-                            hasChanged = true;
-                        }
-
-                        if (hasChanged)
-                        {
-                            Console.Write($"{Path.GetFileName(audioFilePath)}: ({string.Join(", ", changedList)})\n");
-                            MetaDataWriter.WriteMetaData(audioFilePath, metaFromOtherSources);
-                        }
+                    if (hasChanged)
+                    {
+                        Console.Write($"{Path.GetFileName(audioFilePath)}: ({string.Join(", ", changedList)})\n");
+                        MetaDataWriter.WriteMetaData(audioFilePath, metaFromOtherSources);
                     }
                 }
                 catch { }
