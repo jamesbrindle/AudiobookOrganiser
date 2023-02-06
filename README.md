@@ -64,10 +64,9 @@ See 'SilentRunAudiobookOrganiser.vb' to run this CLI as a scheduled task, hidden
 
 ## Command Line Arguments
 
-There only exists 1
 
 ```
-AudiobookOrganiser.exe -audible-cli
+AudiobookOrganiser.exe -audible-sync
 ```
 
 This will perform a 1-way sink from Audible only. It will only refresh from the 'last sync' (not redownloading everything), so it's very quick.
@@ -75,6 +74,13 @@ This will perform a 1-way sink from Audible only. It will only refresh from the 
 If you **don't** include any arguments, it will perform ane existing library sync only, which, depending on the size of your library and if anything needs converting, can take a while.
 
 I personaly opt to run -audible-sync regularly on a scheduled task, and run without arguments manually.
+
+```
+AudiobookOrganiser.exe -update-tags-only
+```
+
+Don't do any file / file reorganising or cleanup, just sort out the tags.
+
 
 ## Modifying Config
 

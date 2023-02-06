@@ -50,7 +50,7 @@ namespace AudiobookOrganiser.Business
 
             }
 
-            tagLib.Tag.Genres = new string[] { "Audiobook" };
+            tagLib.Tag.Genres = new string[] { "Audiobook" };          
 
             if (!string.IsNullOrWhiteSpace(metaData.Series))
             {
@@ -59,6 +59,23 @@ namespace AudiobookOrganiser.Business
                 else
                     tagLib.Tag.Grouping = $"{metaData.Series}";
             }
+
+            if (string.IsNullOrWhiteSpace(metaData.Album))
+            {
+                if (string.IsNullOrEmpty(metaData.Series))
+                {
+                    tagLib.Tag.Album = metaData.Title;
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(metaData.SeriesPart))
+                        tagLib.Tag.Album = $"{metaData.Title}: {metaData.Series}, Book {metaData.SeriesPart}";
+                    else
+                        tagLib.Tag.Album = $"{metaData.Title}: {metaData.Series}";
+                }
+            }
+            else
+                tagLib.Tag.Album = metaData.Album;
 
             if (string.IsNullOrWhiteSpace(metaData.AlbumSort))
             {
@@ -69,14 +86,19 @@ namespace AudiobookOrganiser.Business
                 else
                 {
                     if (!string.IsNullOrEmpty(metaData.SeriesPart))
-                        tagLib.Tag.AlbumSort = $"{metaData.Series} {metaData.SeriesPart} - {metaData.Title}";
+                        tagLib.Tag.AlbumSort = $"{metaData.Series}, Book {metaData.SeriesPart} - {metaData.Title}";
                     else
                         tagLib.Tag.AlbumSort = $"{metaData.Series} - {metaData.Title}";
                 }
             }
+            else
+                tagLib.Tag.AlbumSort = metaData.AlbumSort;
 
             if (!string.IsNullOrWhiteSpace(metaData.Asin))
                 tagLib.Tag.AmazonId = metaData.Asin;
+
+            if (!string.IsNullOrWhiteSpace(metaData.Overview))
+                tagLib.Tag.Comment = metaData.Overview;
 
             if (!string.IsNullOrWhiteSpace(metaData.Year))
             {

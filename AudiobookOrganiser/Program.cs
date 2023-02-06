@@ -22,6 +22,11 @@ namespace AudiobookOrganiser
                 SyncFromAudibleCli.Run();
                 ConsoleEx.WriteColoured(ConsoleColor.Green, "\n\nDONE!");
             }
+            else if (args.Contains("-update-tags-only"))
+            {
+                CheckAndRewriteTags.Run(true);
+                ConsoleEx.WriteColoured(ConsoleColor.Green, "\n\nDONE!");
+            }
             else
             {
                 foreach (var library in LibraryRootPaths)
@@ -32,7 +37,7 @@ namespace AudiobookOrganiser
 
                 SyncFromOpenAudibleDownloads.Run();
                 ConvertExistingMp3ToM4b.Run();
-                CheckAndRewriteTags.Run();
+                CheckAndRewriteTags.Run(true);
 
                 ConsoleEx.WriteColoured(ConsoleColor.Green, "\n\nDONE!");
 
@@ -87,7 +92,7 @@ namespace AudiobookOrganiser
                     var originalDbFilePath = dbFiles.Where(m => Path.GetFileName(m).ToLower().Contains("readarr")).FirstOrDefault();
                     _tempReadarrDbPath = originalDbFilePath;
 
-                    string tempDbFilePath = Path.ChangeExtension(Path.GetTempFileName(), ".db");                    
+                    string tempDbFilePath = Path.ChangeExtension(Path.GetTempFileName(), ".db");
 
                     Helpers.DbHelper.BackupDatabase(originalDbFilePath, tempDbFilePath);
 

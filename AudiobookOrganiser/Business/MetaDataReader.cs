@@ -1,7 +1,6 @@
 ﻿using AudiobookOrganiser.Models;
 using Newtonsoft.Json;
 using System;
-using System.Configuration;
 using System.Data.SQLite;
 using System.IO;
 using System.Linq;
@@ -20,7 +19,8 @@ namespace AudiobookOrganiser.Business
             bool tryParseMetaFromOpenAudible,
             bool small,
             string libraryRootPath = null,
-            bool getProperGenre = false)
+            bool getProperGenre = false,
+            bool forOverwriting = false)
         {
             var metaData = new AudiobookMetaData();
 
@@ -42,6 +42,36 @@ namespace AudiobookOrganiser.Business
                     metaData = GetMetaFromOpenAudible(metaData, audioFile);
                 }
                 catch { }
+            }
+
+            if (string.IsNullOrEmpty(metaData.Album) || forOverwriting)
+            {
+                if (string.IsNullOrEmpty(metaData.Series))
+                {
+                    metaData.Album = metaData.Title;
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(metaData.SeriesPart))
+                        metaData.Album = $"{metaData.Title}: {metaData.Series}, Book {metaData.SeriesPart}";
+                    else
+                        metaData.Album = $"{metaData.Title}: {metaData.Series}";
+                }
+            }
+
+            if (string.IsNullOrEmpty(metaData.AlbumSort) || forOverwriting)
+            {
+                if (string.IsNullOrEmpty(metaData.Series))
+                {
+                    metaData.AlbumSort = metaData.Title;
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(metaData.SeriesPart))
+                        metaData.AlbumSort = $"{metaData.Series}, Book {metaData.SeriesPart} - {metaData.Title}";
+                    else
+                        metaData.AlbumSort = $"{metaData.Series} - {metaData.Title}";
+                }
             }
 
             if (tryParseMetaFromPath && !string.IsNullOrEmpty(libraryRootPath))
@@ -278,6 +308,82 @@ namespace AudiobookOrganiser.Business
                                        .Trim();
 
             /*
+             * Album
+             */
+
+            if (string.IsNullOrEmpty(metaData.Album))
+                metaData.Album = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "album"))?
+                                       .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Album))
+                metaData.Album = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Album"))?
+                                       .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Album))
+                metaData.Album = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "ALBUM"))?
+                                       .Trim();
+
+            /*
+             * Album Sort
+             */
+
+            if (string.IsNullOrEmpty(metaData.AlbumSort))
+                metaData.AlbumSort = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Album_Sort"))?
+                                           .Replace("  ", " ")
+                                           .Trim();
+
+            if (string.IsNullOrEmpty(metaData.AlbumSort))
+                metaData.AlbumSort = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "ALBUMSORT"))?
+                                           .Replace("  ", " ")
+                                           .Trim();
+
+            if (string.IsNullOrEmpty(metaData.AlbumSort))
+                metaData.AlbumSort = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "TSOA"))?
+                                           .Replace("  ", " ")
+                                           .Trim();
+
+            /*
+             * Overview
+             */
+
+            if (string.IsNullOrEmpty(metaData.Overview))
+                metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Overview"))?
+                                          .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Overview))
+                metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "OVERVIEW"))?
+                                          .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Overview))
+                metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "overview"))?
+                                          .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Overview))
+                metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "comment"))?
+                                          .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Overview))
+                metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Comment"))?
+                                          .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Overview))
+                metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "COMMENT"))?
+                                          .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Overview))
+                metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Summary"))?
+                                          .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Overview))
+                metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "summary"))?
+                                          .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Overview))
+                metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "SUMMARY"))?
+                                          .Trim();
+
+
+            /*
              * Year
              */
 
@@ -304,25 +410,6 @@ namespace AudiobookOrganiser.Business
                 metaData.Year = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Tagged_Date"))?
                                       .Replace("  ", " ")
                                       .Trim();
-
-            /*
-            * Album Sort
-            */
-
-            if (string.IsNullOrEmpty(metaData.AlbumSort))
-                metaData.AlbumSort = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Album_Sort"))?
-                                        .Replace("  ", " ")
-                                        .Trim();
-
-            if (string.IsNullOrEmpty(metaData.AlbumSort))
-                metaData.AlbumSort = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "ALBUMSORT"))?
-                                        .Replace("  ", " ")
-                                        .Trim();
-
-            if (string.IsNullOrEmpty(metaData.AlbumSort))
-                metaData.AlbumSort = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "TSOA"))?
-                                        .Replace("  ", " ")
-                                        .Trim();
 
             /*
              * Series
@@ -508,9 +595,10 @@ namespace AudiobookOrganiser.Business
 
             // Fallback
 
-            if (string.IsNullOrEmpty(metaData.AlbumSort))
+            if (string.IsNullOrEmpty(metaData.AlbumSort) || string.IsNullOrEmpty(metaData.Album))
             {
                 var tagLib = TagLib.File.Create(audioFilePath);
+                metaData.Album = tagLib.Tag.Album;
                 metaData.AlbumSort = tagLib.Tag.AlbumSort;
 
                 tagLib.Dispose();
@@ -762,6 +850,9 @@ namespace AudiobookOrganiser.Business
                             if (string.IsNullOrEmpty(metaData.Title))
                                 metaData.Title = reader["Title"].ToString();
 
+                            if (!string.IsNullOrEmpty(reader["Overview"].ToString()))
+                                metaData.Overview = reader["Overview"].ToString();
+
                             if (string.IsNullOrEmpty(metaData.Genre))
                                 metaData.Genre = FormatJsonGenres(reader["Genres"].ToString())?.Trim();
 
@@ -830,10 +921,13 @@ namespace AudiobookOrganiser.Business
                         metaData.Genre = string.Empty;
 
                     if (string.IsNullOrEmpty(metaData.Series))
-                        metaData.Series = book.series_name?.Trim();
+                        metaData.Series = book.series_name?.Trim();                   
 
                     if (string.IsNullOrEmpty(metaData.SeriesPart))
                         metaData.SeriesPart = book.series_sequence?.Trim();
+
+                    if (!string.IsNullOrEmpty(book.summary?.Trim()))
+                        metaData.Overview = book.summary?.Trim();
 
                     if (string.IsNullOrEmpty(metaData.Year))
                     {
