@@ -98,7 +98,10 @@ namespace AudiobookOrganiser.Business
                 tagLib.Tag.AmazonId = metaData.Asin;
 
             if (!string.IsNullOrWhiteSpace(metaData.Overview))
+            {
                 tagLib.Tag.Comment = metaData.Overview;
+                tagLib.Tag.Description = metaData.Overview;
+            }
 
             if (!string.IsNullOrWhiteSpace(metaData.Year))
             {

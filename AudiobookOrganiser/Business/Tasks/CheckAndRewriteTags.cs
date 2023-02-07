@@ -26,11 +26,12 @@ namespace AudiobookOrganiser.Business.Tasks
             {
                 try
                 {
+                   
+
                     var metaOnlyFromFile = MetaDataReader.GetMetaData(audioFilePath, false, false, false, false, null, true);
                     var metaFromOtherSources = MetaDataReader.GetMetaData(audioFilePath, true, true, true, false, forOverwriting: true);
 
                     metaFromOtherSources.ProperGenre = "Audiobook";
-
 
                     bool hasChanged = false;
                     var changedList = new List<string>();

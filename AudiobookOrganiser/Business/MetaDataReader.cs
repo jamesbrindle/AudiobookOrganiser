@@ -382,14 +382,28 @@ namespace AudiobookOrganiser.Business
                 metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "SUMMARY"))?
                                           .Trim();
 
+            if (string.IsNullOrEmpty(metaData.Overview))
+                metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Description"))?
+                                          .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Overview))
+                metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "description"))?
+                                          .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Overview))
+                metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "DESCRIPTION"))?
+                                          .Trim();
+
+            if (!string.IsNullOrEmpty(metaData.Overview))
+                metaData.Overview = metaData.Overview;
 
             /*
              * Year
              */
 
             metaData.Year = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "year"))?
-                                  .Replace("  ", " ")
-                                  .Trim();
+                              .Replace("  ", " ")
+                              .Trim();
 
             if (string.IsNullOrEmpty(metaData.Year))
                 metaData.Year = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Year"))?
@@ -851,7 +865,7 @@ namespace AudiobookOrganiser.Business
                                 metaData.Title = reader["Title"].ToString();
 
                             if (!string.IsNullOrEmpty(reader["Overview"].ToString()))
-                                metaData.Overview = reader["Overview"].ToString();
+                                metaData.Overview = FormatOverview(reader["Overview"].ToString());
 
                             if (string.IsNullOrEmpty(metaData.Genre))
                                 metaData.Genre = FormatJsonGenres(reader["Genres"].ToString())?.Trim();
@@ -921,13 +935,13 @@ namespace AudiobookOrganiser.Business
                         metaData.Genre = string.Empty;
 
                     if (string.IsNullOrEmpty(metaData.Series))
-                        metaData.Series = book.series_name?.Trim();                   
+                        metaData.Series = book.series_name?.Trim();
 
                     if (string.IsNullOrEmpty(metaData.SeriesPart))
                         metaData.SeriesPart = book.series_sequence?.Trim();
 
                     if (!string.IsNullOrEmpty(book.summary?.Trim()))
-                        metaData.Overview = book.summary?.Trim();
+                        metaData.Overview = FormatOverview(book.summary?.Trim());
 
                     if (string.IsNullOrEmpty(metaData.Year))
                     {
@@ -957,6 +971,28 @@ namespace AudiobookOrganiser.Business
                            .Replace("  ", " ");
 
             return genres;
+        }
+
+        private static string FormatOverview(string originalOverview)
+        {
+            originalOverview = originalOverview.Replace("<p>", "");
+            originalOverview = originalOverview.Replace("</p>", "\r\n\r\n");
+            originalOverview = originalOverview.Replace("<br />", "\r\n");
+            originalOverview = originalOverview.Replace("<br>", "\r\n");
+            originalOverview = originalOverview.Replace("<br/>", "\r\n");
+            originalOverview = Regex.Replace(originalOverview, @"<[^>]*>", string.Empty);
+            originalOverview = originalOverview.Replace("\n    ", "\n");
+            originalOverview = originalOverview.Replace("\r    ", "\n");
+            originalOverview = originalOverview.Replace("\n   ", "\n");
+            originalOverview = originalOverview.Replace("\r   ", "\n");
+            originalOverview = originalOverview.Replace("\n  ", "\n");
+            originalOverview = originalOverview.Replace("\r  ", "\n");
+            originalOverview = originalOverview.Replace("\n ", "\n");
+            originalOverview = originalOverview.Replace("\r ", "\n");
+
+            originalOverview = originalOverview.Replace("  ", " ").Trim();
+
+            return originalOverview;
         }
     }
 }
