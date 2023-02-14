@@ -4,7 +4,7 @@ This a command line utility that 'organises' an audiobook collection to a partic
 
 ## Likely Won't Serve Your Needs Out of the Box
 
-I create this simple console app just for myself, to organise my fairly large library of audio books, that, before organisating had a variety of weird and wonderful naming conversions, audio formats and missing audiobooks that were in my Audible library but not local, and missing meta data... Because I got bored.
+I create this simple console app just for myself, to organise my fairly large library of audiobooks, that, before organisating had a variety of weird and wonderful naming conversions, audio formats and missing audiobooks that were in my Audible library but not local, and missing meta data... Because I got bored.
 
 This application wasn't written for the intention of allowing a multidude of 'options' to cater for anyone elses preferences, nor to create some sor to sort of fan base. If you wish to customise for your preferences, it shouldn't be hard to do so...
 

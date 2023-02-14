@@ -33,23 +33,24 @@ namespace AudiobookOrganiser.Business.Tasks
                                 metaData.Author?.Split(',')?[0].Trim(),
                                 metaData.Series,
                                 (string.IsNullOrEmpty(metaData.SeriesPart)
+                                    ? ""
+                                    : metaData.SeriesPart + ". ") +
+                                metaData.Title,
+                                metaData.Title +
+                                    (string.IsNullOrEmpty(metaData.SeriesPart)
                                         ? ""
-                                        : metaData.SeriesPart + ". ") +
-                                    metaData.Title +
-                                        (string.IsNullOrEmpty(metaData.SeriesPart)
+                                        : " (Book " + metaData.SeriesPart + ")") +
+                                        " - " +
+                                    (string.IsNullOrEmpty(metaData.Year)
+                                        ? ""
+                                        : metaData.Year) +
+                                    (string.IsNullOrEmpty(metaData.Narrator)
+                                        ? ""
+                                        : (string.IsNullOrEmpty(metaData.Year)
                                             ? ""
-                                            : " (Book " + metaData.SeriesPart + ")") +
-                                         " - " +
-                                        (string.IsNullOrEmpty(metaData.Year)
-                                            ? ""
-                                            : metaData.Year) +
-                                        (string.IsNullOrEmpty(metaData.Narrator)
-                                            ? ""
-                                            : (string.IsNullOrEmpty(metaData.Year)
-                                                ? ""
-                                                : " ") +
-                                                "(Narrated - " + metaData.Narrator + ")")
-                                    + Path.GetExtension(audioFilePath));
+                                            : " ") +
+                                            "(Narrated - " + metaData.Narrator + ")")
+                                + Path.GetExtension(audioFilePath));
 
                             if (newFilename.Length > 255)
                             {
@@ -60,33 +61,34 @@ namespace AudiobookOrganiser.Business.Tasks
                                     metaData.Author.Split(',')?[0].Trim(),
                                     metaData.Series,
                                     (string.IsNullOrEmpty(metaData.SeriesPart)
+                                        ? ""
+                                        : metaData.SeriesPart + ". ") +
+                                    metaData.Title,
+                                    metaData.Title +
+                                        (string.IsNullOrEmpty(metaData.SeriesPart)
                                             ? ""
-                                            : metaData.SeriesPart + ". ") +
-                                        metaData.Title +
-                                            (string.IsNullOrEmpty(metaData.SeriesPart)
+                                            : " (Book " + metaData.SeriesPart + ")") +
+                                            " - " +
+                                        (string.IsNullOrEmpty(metaData.Year)
+                                            ? ""
+                                            : metaData.Year) +
+                                        (string.IsNullOrEmpty(metaData.Narrator)
+                                            ? ""
+                                            : (string.IsNullOrEmpty(metaData.Year)
                                                 ? ""
-                                                : " (Book " + metaData.SeriesPart + ")") +
-                                             " - " +
-                                            (string.IsNullOrEmpty(metaData.Year)
-                                                ? ""
-                                                : metaData.Year) +
-                                            (string.IsNullOrEmpty(metaData.Narrator)
-                                                ? ""
-                                                : (string.IsNullOrEmpty(metaData.Year)
-                                                    ? ""
-                                                    : " ") +
-                                                    "(Narrated - " + metaData.Narrator + ")")
-                                        + Path.GetExtension(audioFilePath));
+                                                : " ") +
+                                                "(Narrated - " + LibraryPathHelper.GetSingleNarrator(metaData.Narrator) + ")")
+                                    + Path.GetExtension(audioFilePath));
 
-                                if (newFilename.Length > 255)
-                                {
-                                    ConsoleEx.WriteColouredLine(
-                                        ConsoleColor.Red,
-                                        $"Skipped: {Path.GetFileNameWithoutExtension(Path.GetFileName(audioFilePath))}: " +
-                                        $"Resulting path too large.");
+                                //if (newFilename.Length > 255)
+                                //{
+                                //    ConsoleEx.WriteColouredLine(
+                                //        ConsoleColor.Red,
+                                //        $"Skipped: {Path.GetFileNameWithoutExtension(Path.GetFileName(audioFilePath))}: " +
+                                //        $"Resulting path too large.");
 
-                                    continue;
-                                }
+                                //    continue;
+                                //}
                             }
 
                             Console.Out.WriteLine(Path.GetFileNameWithoutExtension(newFilename));

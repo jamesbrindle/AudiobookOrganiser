@@ -1,4 +1,5 @@
-﻿using AudiobookOrganiser.Models;
+﻿using AudiobookOrganiser.Helpers;
+using AudiobookOrganiser.Models;
 using Newtonsoft.Json;
 using System;
 using System.Data.SQLite;
@@ -78,10 +79,10 @@ namespace AudiobookOrganiser.Business
                 metaData = GetMetaDataByParsingFilePath(metaData, libraryRootPath, audioFile);
 
             if (!string.IsNullOrEmpty(metaData.Author))
-                metaData.Author = new string(metaData.Author.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
+                metaData.Author = new string(metaData.Author.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray()).Replace(";", ",");
 
             if (!string.IsNullOrEmpty(metaData.Narrator))
-                metaData.Narrator = new string(metaData.Narrator.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
+                metaData.Narrator = new string(metaData.Narrator.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray()).Replace(";", ",");
 
             if (!string.IsNullOrEmpty(metaData.Title))
                 metaData.Title = new string(metaData.Title.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
@@ -129,21 +130,22 @@ namespace AudiobookOrganiser.Business
                         (string.IsNullOrEmpty(metaData.SeriesPart)
                                 ? ""
                                 : metaData.SeriesPart + ". ") +
-                            metaData.Title +
-                                (string.IsNullOrEmpty(metaData.SeriesPart)
+                        metaData.Title + "\\" +
+                        metaData.Title +
+                            (string.IsNullOrEmpty(metaData.SeriesPart)
+                                ? ""
+                                : " (Book " + metaData.SeriesPart + ")") +
+                                " - " +
+                            (string.IsNullOrEmpty(metaData.Year)
+                                ? ""
+                                : metaData.Year) +
+                            (string.IsNullOrEmpty(metaData.Narrator)
+                                ? ""
+                                : (string.IsNullOrEmpty(metaData.Year)
                                     ? ""
-                                    : " (Book " + metaData.SeriesPart + ")") +
-                                 " - " +
-                                (string.IsNullOrEmpty(metaData.Year)
-                                    ? ""
-                                    : metaData.Year) +
-                                (string.IsNullOrEmpty(metaData.Narrator)
-                                    ? ""
-                                    : (string.IsNullOrEmpty(metaData.Year)
-                                        ? ""
-                                        : " ") +
-                                        "(Narrated - " + metaData.Narrator + ")")
-                            + Path.GetExtension(audioFilePath);
+                                    : " ") +
+                                    "(Narrated - " + LibraryPathHelper.GetSingleNarrator(metaData.Narrator) + ")")
+                        + Path.GetExtension(audioFilePath);
 
                     if ((Path.GetDirectoryName(audioFilePath) + "\\" + newFilename).Length > 255)
                     {
@@ -153,23 +155,24 @@ namespace AudiobookOrganiser.Business
                             (string.IsNullOrEmpty(metaData.Author) ? "" : (metaData.Author.Split(',')?[0].Trim() + "\\")) +
                             (string.IsNullOrEmpty(metaData.Series) ? "" : (metaData.Series + "\\")) +
                             (string.IsNullOrEmpty(metaData.SeriesPart)
+                                ? ""
+                                : metaData.SeriesPart + ". ") +
+                            metaData.Title + "\\" +
+                            metaData.Title +
+                                (string.IsNullOrEmpty(metaData.SeriesPart)
                                     ? ""
-                                    : metaData.SeriesPart + ". ") +
-                                metaData.Title +
-                                    (string.IsNullOrEmpty(metaData.SeriesPart)
+                                    : " (Book " + metaData.SeriesPart + ")") +
+                                    " - " +
+                                (string.IsNullOrEmpty(metaData.Year)
+                                    ? ""
+                                    : metaData.Year) +
+                                (string.IsNullOrEmpty(metaData.Narrator)
+                                    ? ""
+                                    : (string.IsNullOrEmpty(metaData.Year)
                                         ? ""
-                                        : " (Book " + metaData.SeriesPart + ")") +
-                                     " - " +
-                                    (string.IsNullOrEmpty(metaData.Year)
-                                        ? ""
-                                        : metaData.Year) +
-                                    (string.IsNullOrEmpty(metaData.Narrator)
-                                        ? ""
-                                        : (string.IsNullOrEmpty(metaData.Year)
-                                            ? ""
-                                            : " ") +
-                                            "(Narrated - " + metaData.Narrator + ")")
-                                + Path.GetExtension(audioFilePath);
+                                        : " ") +
+                                        "(Narrated - " + LibraryPathHelper.GetSingleNarrator(metaData.Narrator) + ")")
+                            + Path.GetExtension(audioFilePath);
 
                         if ((Path.GetDirectoryName(audioFilePath) + "\\" + newFilename).Length > 255)
                             newFilename = Path.GetFileName(audioFilePath);

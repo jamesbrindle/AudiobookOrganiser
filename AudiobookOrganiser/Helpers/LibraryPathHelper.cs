@@ -63,6 +63,18 @@ namespace AudiobookOrganiser.Helpers
             Directory.Delete(source, true);
         }
 
+        internal static string GetSingleNarrator(string currentNarrator)
+        {
+            try
+            {
+                return currentNarrator.Replace(";", ",").Split(',')[0].Trim();
+            }
+            catch
+            {
+                return currentNarrator;
+            }
+        }
+
         private class Folders
         {
             public string Source { get; private set; }
