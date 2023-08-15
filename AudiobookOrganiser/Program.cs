@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using TagLib;
 using static System.Extensions;
 
 namespace AudiobookOrganiser

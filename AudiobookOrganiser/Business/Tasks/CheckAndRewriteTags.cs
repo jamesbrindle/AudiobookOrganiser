@@ -26,7 +26,7 @@ namespace AudiobookOrganiser.Business.Tasks
             {
                 try
                 {
-                   
+
 
                     var metaOnlyFromFile = MetaDataReader.GetMetaData(audioFilePath, false, false, false, false, null, true);
                     var metaFromOtherSources = MetaDataReader.GetMetaData(audioFilePath, true, true, true, false, forOverwriting: true);

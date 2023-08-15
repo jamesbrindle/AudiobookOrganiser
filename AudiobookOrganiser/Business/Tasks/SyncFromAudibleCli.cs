@@ -1,7 +1,7 @@
 ﻿using AudiobookOrganiser.Helpers;
-using AudiobookOrganiser.Models;
 using AudiobookOrganiser.Helpers.FfMpegWrapper;
 using AudiobookOrganiser.Helpers.FfMpegWrapper.Extensions;
+using AudiobookOrganiser.Models;
 using Newtonsoft.Json;
 using System;
 using System.IO;

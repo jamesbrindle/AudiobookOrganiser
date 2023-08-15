@@ -50,7 +50,7 @@ namespace AudiobookOrganiser.Business
 
             }
 
-            tagLib.Tag.Genres = new string[] { "Audiobook" };          
+            tagLib.Tag.Genres = new string[] { "Audiobook" };
 
             if (!string.IsNullOrWhiteSpace(metaData.Series))
             {

@@ -170,7 +170,7 @@ namespace AudiobookOrganiser.Business.Tasks
                         directory,
                         Path.Combine(libraryRootPath, new DirectoryInfo(directory).Name));
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     ConsoleEx.WriteColouredLine(ConsoleColor.Red, $"Could not move file: {directory}: ({e.Message})");
                 }
