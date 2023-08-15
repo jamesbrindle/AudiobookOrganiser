@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using TagLib;
 using static System.Extensions;
 
 namespace AudiobookOrganiser
@@ -16,6 +17,8 @@ namespace AudiobookOrganiser
             ConsoleEx.WriteColouredLine(ConsoleColor.Green, "--------------------------------------");
             ConsoleEx.WriteColouredLine(ConsoleColor.Green, "- Audiobook Organiser -");
             ConsoleEx.WriteColouredLine(ConsoleColor.Green, "--------------------------------------");
+
+            CleanUpTempFiles();
 
             if (args.Contains("-audible-sync"))
             {
@@ -45,14 +48,8 @@ namespace AudiobookOrganiser
                 Thread.Sleep(3000);
             }
 
-            if (!string.IsNullOrEmpty(_tempReadarrDbPath) && File.Exists(_tempReadarrDbPath))
-            {
-                try
-                {
-                    File.Delete(_tempReadarrDbPath);
-                }
-                catch { }
-            }
+            Thread.Sleep(1000);
+            CleanUpTempFiles();
         }
 
         internal static string[] LibraryRootPaths { get; set; }
@@ -83,7 +80,7 @@ namespace AudiobookOrganiser
             {
                 try
                 {
-                    if (!string.IsNullOrEmpty(_tempReadarrDbPath) && File.Exists(_tempReadarrDbPath))
+                    if (!string.IsNullOrEmpty(_tempReadarrDbPath) && System.IO.File.Exists(_tempReadarrDbPath))
                         return _tempReadarrDbPath;
 
                     var dbFiles = Directory.GetFiles(ConfigurationManager.AppSettings["ReadarrAppDataRoute"].Trim(), "*.db", SearchOption.TopDirectoryOnly).ToList();
@@ -92,7 +89,12 @@ namespace AudiobookOrganiser
                     var originalDbFilePath = dbFiles.Where(m => Path.GetFileName(m).ToLower().Contains("readarr")).FirstOrDefault();
                     _tempReadarrDbPath = originalDbFilePath;
 
-                    string tempDbFilePath = Path.ChangeExtension(Path.GetTempFileName(), ".db");
+                    string tempDbFileDir = Path.Combine(Path.GetTempPath(), "AudioBookOrganiser");
+
+                    if (!Directory.Exists(tempDbFileDir))
+                        Directory.CreateDirectory(tempDbFileDir);
+
+                    string tempDbFilePath = Path.Combine(tempDbFileDir, Guid.NewGuid().ToString() + ".db");
 
                     Helpers.DbHelper.BackupDatabase(originalDbFilePath, tempDbFilePath);
 
@@ -110,6 +112,28 @@ namespace AudiobookOrganiser
             {
                 _tempReadarrDbPath = value;
             }
+        }
+
+        private static void CleanUpTempFiles()
+        {
+            try
+            {
+                foreach (var file in Directory.GetFiles(Path.Combine(Path.GetTempPath(), "AudioBookOrganiser"), "*.*", SearchOption.AllDirectories))
+                {
+                    try
+                    {
+                        System.IO.File.Delete(file);
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+
+            try
+            {
+                Directory.Delete(Path.Combine(Path.GetTempPath(), "AudioBookOrganiser"), true);
+            }
+            catch { }
         }
     }
 }
