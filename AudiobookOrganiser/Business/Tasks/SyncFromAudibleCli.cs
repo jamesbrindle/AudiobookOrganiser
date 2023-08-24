@@ -196,11 +196,11 @@ namespace AudiobookOrganiser.Business.Tasks
                                 var cancelToken = cancelTokenSource.Token;
                                 var conversionOptions = new ConversionOptions
                                 {
-                                    Format = AudiobookOrganiser.Helpers.FfMpegWrapper.Enums.Format.m4b,
+                                    Format = Helpers.FfMpegWrapper.Enums.Format.m4b,
                                     HideBanner = true,
                                     Copy = true,
                                     HWAccelOutputFormatCopy = true,
-                                    Codec = AudiobookOrganiser.Helpers.FfMpegWrapper.Enums.Codec.copy,
+                                    Codec = Helpers.FfMpegWrapper.Enums.Codec.copy,
                                     Overwrite = true
                                 };
 
@@ -317,25 +317,49 @@ namespace AudiobookOrganiser.Business.Tasks
                 try
                 {
                     var metaData = MetaDataReader.GetMetaData(audioFile, false, false, false, false, null);
+                    string audioBookTitle = MetaDataReader.GetAudiobookTitle(audioFile);
+                    string mp3Path = string.Empty;
+                    string copyToPath = string.Empty;
+                    bool fileAlreadyPresent = false;
 
-                    string copyToPath = Path.Combine(
-                        LibraryPathHelper.DetermineLibraryPath(metaData),
-                        MetaDataReader.GetAudiobookTitle(audioFile));
-
-                    string mp3Path = Path.ChangeExtension(copyToPath, ".mp3");
-
-                    if (File.Exists(mp3Path))
-                        File.Delete(mp3Path);
-
-                    if (!File.Exists(copyToPath))
+                    foreach (string libraryPath in Program.LibraryRootPaths)
                     {
-                        if (!Directory.Exists(Path.GetDirectoryName(copyToPath)))
-                            Directory.CreateDirectory(Path.GetDirectoryName(copyToPath));
+                        if (!string.IsNullOrEmpty(audioBookTitle))
+                        {
+                            string possiblePath = Path.Combine(libraryPath, audioBookTitle);
+                            if (!string.IsNullOrEmpty(possiblePath))
+                            {
+                                mp3Path = Path.ChangeExtension(possiblePath, ".mp3");
+                                if (!string.IsNullOrEmpty(mp3Path) && File.Exists(mp3Path))
+                                    File.Delete(mp3Path);
 
-                        File.Copy(audioFile, copyToPath);
+                                if (File.Exists(possiblePath))
+                                    fileAlreadyPresent = true;
+                            }
+                        }
                     }
 
-                    CopyPdf(audioFile, copyToPath, true);
+                    if (!fileAlreadyPresent)
+                    {
+                        copyToPath = Path.Combine(
+                            LibraryPathHelper.DetermineLibraryPath(metaData),
+                            audioBookTitle);
+
+                        mp3Path = Path.ChangeExtension(copyToPath, ".mp3");
+
+                        if (File.Exists(mp3Path))
+                            File.Delete(mp3Path);
+
+                        if (!File.Exists(copyToPath))
+                        {
+                            if (!Directory.Exists(Path.GetDirectoryName(copyToPath)))
+                                Directory.CreateDirectory(Path.GetDirectoryName(copyToPath));
+
+                            File.Copy(audioFile, copyToPath);
+                        }
+
+                        CopyPdf(audioFile, copyToPath, true);
+                    }
                 }
                 catch { }
             });

@@ -14,6 +14,15 @@ namespace AudiobookOrganiser.Helpers
                 return Program.LibraryRootPaths.Where(l => l.Contains("Fiction") && !l.Contains("Non-Fiction")).FirstOrDefault();
 
             else if (metaData.Genre.StringContainsIn(
+                "non-fiction",
+                "non - fiction",
+                "nonfiction",
+                "non fiction"))
+            {
+                return Program.LibraryRootPaths.Where(l => l.Contains("\\Non-Fiction")).FirstOrDefault();
+            }
+
+            else if (metaData.Genre.StringContainsIn(
                 "fiction",
                 "mystery",
                 "triller",

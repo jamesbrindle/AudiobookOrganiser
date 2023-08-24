@@ -614,11 +614,15 @@ namespace AudiobookOrganiser.Business
 
             if (string.IsNullOrEmpty(metaData.AlbumSort) || string.IsNullOrEmpty(metaData.Album))
             {
-                var tagLib = TagLib.File.Create(audioFilePath);
-                metaData.Album = tagLib.Tag.Album;
-                metaData.AlbumSort = tagLib.Tag.AlbumSort;
+                try
+                {
+                    var tagLib = TagLib.File.Create(audioFilePath);
+                    metaData.Album = tagLib.Tag.Album;
+                    metaData.AlbumSort = tagLib.Tag.AlbumSort;
 
-                tagLib.Dispose();
+                    tagLib.Dispose();
+                }
+                catch { }
             }
 
             return metaData;
