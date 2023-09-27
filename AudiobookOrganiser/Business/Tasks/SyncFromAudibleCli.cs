@@ -339,11 +339,28 @@ namespace AudiobookOrganiser.Business.Tasks
                         }
                     }
 
+                    foreach (string libraryPath in Program.LibraryRootPaths)
+                    {
+                        if (!string.IsNullOrEmpty(audioBookTitle))
+                        {
+                            string possiblePath = Path.Combine(libraryPath, audioBookTitle).Replace("...", "");
+                            if (!string.IsNullOrEmpty(possiblePath))
+                            {
+                                mp3Path = Path.ChangeExtension(possiblePath, ".mp3");
+                                if (!string.IsNullOrEmpty(mp3Path) && File.Exists(mp3Path))
+                                    File.Delete(mp3Path);
+
+                                if (File.Exists(possiblePath))
+                                    fileAlreadyPresent = true;
+                            }
+                        }
+                    }
+
                     if (!fileAlreadyPresent)
                     {
                         copyToPath = Path.Combine(
                             LibraryPathHelper.DetermineLibraryPath(metaData),
-                            audioBookTitle);
+                            audioBookTitle).Replace("...", "");
 
                         mp3Path = Path.ChangeExtension(copyToPath, ".mp3");
 

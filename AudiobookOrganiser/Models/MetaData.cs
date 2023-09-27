@@ -1,4 +1,6 @@
-﻿namespace AudiobookOrganiser.Models
+﻿using System;
+
+namespace AudiobookOrganiser.Models
 {
     internal class AudiobookMetaData
     {
@@ -14,5 +16,6 @@
         public string ProperGenre { get; set; }
         public string Asin { get; set; }
         public string Overview { get; set; }
+        public TimeSpan? Duration { get; set; } = null;
     }
 }

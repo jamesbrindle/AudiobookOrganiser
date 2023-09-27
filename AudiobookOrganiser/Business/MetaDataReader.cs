@@ -197,6 +197,13 @@ namespace AudiobookOrganiser.Business
              * Author
              */
 
+            try
+            {
+                if (metaData.Duration == null)
+                    metaData.Duration = new MediaInfoLib.AudioInfo(mediaInfo).Duration;
+            }
+            catch { }
+
             metaData.Author = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "author"))?
                                     .Replace("  ", " ")
                                     .Trim();
@@ -825,7 +832,7 @@ namespace AudiobookOrganiser.Business
                 command.CommandText =
                 @"
                     SELECT
-	                    b.ReleaseDate,
+                        b.ReleaseDate,
 	                    b.Genres,
 	                    e.Isbn13,
 	                    e.Asin,
@@ -926,6 +933,13 @@ namespace AudiobookOrganiser.Business
 
                 if (book != null)
                 {
+                    try
+                    {
+                        if (metaData.Duration == null)
+                            metaData.Duration = TimeSpan.Parse(book.duration);
+                    }
+                    catch { }
+
                     if (string.IsNullOrEmpty(metaData.Author))
                         metaData.Author = book.author?.Trim();
 
