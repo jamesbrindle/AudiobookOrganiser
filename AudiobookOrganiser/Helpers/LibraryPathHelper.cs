@@ -77,7 +77,7 @@ namespace AudiobookOrganiser.Helpers
                 return Program.LibraryRootPaths.Where(l => l.StringContainsIn("Comedy")).FirstOrDefault();
             }
 
-            return Program.LibraryRootPaths.Where(l => l.StringContainsIn("Non-Fiction")).FirstOrDefault();
+            return Program.LibraryRootPaths.Where(l => l.StringContainsIn("Fiction") && !l.StringContainsIn("Non-Fiction")).FirstOrDefault();
         }
 
         public static void MoveDirectory(string source, string target)
