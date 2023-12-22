@@ -42,8 +42,8 @@ namespace AudiobookOrganiser.Business.Tasks
                             var conversionOptions = new ConversionOptions
                             {
                                 Overwrite = false,
-                                Codec = AudiobookOrganiser.Helpers.FfMpegWrapper.Enums.Codec.libfdk_aac,
-                                Format = AudiobookOrganiser.Helpers.FfMpegWrapper.Enums.Format.m4b,
+                                Codec = Helpers.FfMpegWrapper.Enums.Codec.libfdk_aac,
+                                Format = Helpers.FfMpegWrapper.Enums.Format.m4b,
                                 RemoveVideo = true,
                                 AudioBitRate = new Track(mp3AudioFile).Bitrate
                             };

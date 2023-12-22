@@ -1,5 +1,8 @@
 ﻿using AudiobookOrganiser.Helpers.FfMpegWrapper.Extensions;
+using System;
+using System.IO;
 using System.Text.RegularExpressions;
+using System.Windows.Navigation;
 
 namespace AudiobookOrganiser.Helpers.FfMpegWrapper
 {
@@ -29,6 +32,52 @@ namespace AudiobookOrganiser.Helpers.FfMpegWrapper
                 string[] parts2 = Regex.Split(parts[1], @"\[");
 
                 return parts2[0].Trim();
+            }
+            catch { }
+
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// Get if the file contains invalid data and cannot be processed by Ffmpeg
+        /// </summary>
+        /// <param name="inputPath">Full path to media file</param>
+        /// <returns>Bool - true if invalid</returns>
+        public bool GetIsInvalidData(string inputPath)
+        {
+            if (!File.Exists(inputPath))
+                throw new ApplicationException("File does not exists");
+
+            try
+            {
+                string output = ProcessExtensions.ExecuteProcessAndReadStdOut(_ffProbeExePath, $"-i \"{inputPath}\"");
+
+                if (output.ToLower().Contains("invalid data found when processing input"))
+                    return true;
+            }
+            catch(Exception e)
+            {
+                var _ = e;
+#if DEBUG
+                Console.Out.WriteLine(e.Message);
+#endif
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Get the output from FfProbe
+        /// </summary>
+        /// <param name="inputPath">Full path to media file</param>
+        /// <returns>Output string</returns>
+        public string GetInfo(string inputPath)
+        {
+            try
+            {
+                string output = ProcessExtensions.ExecuteProcessAndReadStdOut(_ffProbeExePath, $"-i \"{inputPath}\"");
+                return output;
             }
             catch { }
 

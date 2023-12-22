@@ -17,5 +17,7 @@ namespace AudiobookOrganiser.Models
         public string Asin { get; set; }
         public string Overview { get; set; }
         public TimeSpan? Duration { get; set; } = null;
+        public uint Track { get; set; } = 1;
+        public string Copyright { get; set; }
     }
 }

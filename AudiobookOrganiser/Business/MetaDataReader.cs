@@ -356,56 +356,53 @@ namespace AudiobookOrganiser.Business
              * Overview
              */
 
-            if (string.IsNullOrEmpty(metaData.Overview))
+            if (string.IsNullOrEmpty(metaData.Overview) || metaData.Overview.ToLower().StartsWith("Chapter"))
                 metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Overview"))?
                                           .Trim();
 
-            if (string.IsNullOrEmpty(metaData.Overview))
+            if (string.IsNullOrEmpty(metaData.Overview) || metaData.Overview.ToLower().StartsWith("Chapter"))
                 metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "OVERVIEW"))?
                                           .Trim();
 
-            if (string.IsNullOrEmpty(metaData.Overview))
+            if (string.IsNullOrEmpty(metaData.Overview) || metaData.Overview.ToLower().StartsWith("Chapter"))
                 metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "overview"))?
                                           .Trim();
 
-            if (string.IsNullOrEmpty(metaData.Overview))
+            if (string.IsNullOrEmpty(metaData.Overview) || metaData.Overview.ToLower().StartsWith("Chapter"))
                 metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "comment"))?
                                           .Trim();
 
-            if (string.IsNullOrEmpty(metaData.Overview))
+            if (string.IsNullOrEmpty(metaData.Overview) || metaData.Overview.ToLower().StartsWith("Chapter"))
                 metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Comment"))?
                                           .Trim();
 
-            if (string.IsNullOrEmpty(metaData.Overview))
+            if (string.IsNullOrEmpty(metaData.Overview) || metaData.Overview.ToLower().StartsWith("Chapter"))
                 metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "COMMENT"))?
                                           .Trim();
 
-            if (string.IsNullOrEmpty(metaData.Overview))
+            if (string.IsNullOrEmpty(metaData.Overview) || metaData.Overview.ToLower().StartsWith("Chapter"))
                 metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Summary"))?
                                           .Trim();
 
-            if (string.IsNullOrEmpty(metaData.Overview))
+            if (string.IsNullOrEmpty(metaData.Overview) || metaData.Overview.ToLower().StartsWith("Chapter"))
                 metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "summary"))?
                                           .Trim();
 
-            if (string.IsNullOrEmpty(metaData.Overview))
+            if (string.IsNullOrEmpty(metaData.Overview) || metaData.Overview.ToLower().StartsWith("Chapter"))
                 metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "SUMMARY"))?
                                           .Trim();
 
-            if (string.IsNullOrEmpty(metaData.Overview))
+            if (string.IsNullOrEmpty(metaData.Overview) || metaData.Overview.ToLower().StartsWith("Chapter"))
                 metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Description"))?
                                           .Trim();
 
-            if (string.IsNullOrEmpty(metaData.Overview))
+            if (string.IsNullOrEmpty(metaData.Overview) || metaData.Overview.ToLower().StartsWith("Chapter"))
                 metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "description"))?
                                           .Trim();
 
-            if (string.IsNullOrEmpty(metaData.Overview))
+            if (string.IsNullOrEmpty(metaData.Overview) || metaData.Overview.ToLower().StartsWith("Chapter"))
                 metaData.Overview = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "DESCRIPTION"))?
                                           .Trim();
-
-            if (!string.IsNullOrEmpty(metaData.Overview))
-                metaData.Overview = metaData.Overview;
 
             /*
              * Year
@@ -509,6 +506,18 @@ namespace AudiobookOrganiser.Business
                                     .Replace("  ", " ")
                                     .Trim();
 
+            // Copyright
+
+            if (string.IsNullOrEmpty(metaData.Copyright))
+                metaData.Copyright = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Copyright"))?
+                                    .Replace("  ", " ")
+                                    .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Copyright))
+                metaData.Copyright = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "COPYRIGHT"))?
+                                    .Replace("  ", " ")
+                                    .Trim();          
+
             if (getProperGenre)
             {
                 if (string.IsNullOrEmpty(metaData.Genre))
@@ -519,6 +528,10 @@ namespace AudiobookOrganiser.Business
                 if (metaData.Genre != null && metaData.Genre == "Audiobook")
                     metaData.Genre = string.Empty;
             }
+
+            // Track
+
+            metaData.Track = 1;
 
             /*
              * Asin
@@ -963,6 +976,9 @@ namespace AudiobookOrganiser.Business
 
                     if (!string.IsNullOrEmpty(book.summary?.Trim()))
                         metaData.Overview = FormatOverview(book.summary?.Trim());
+
+                    if (string.IsNullOrEmpty(metaData.Copyright))
+                        metaData.Copyright = book.copyright?.Trim();
 
                     if (string.IsNullOrEmpty(metaData.Year))
                     {

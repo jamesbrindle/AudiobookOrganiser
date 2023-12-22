@@ -25,6 +25,7 @@ namespace AudiobookOrganiser.Models
             public string series_sequence { get; set; }
             public string subtitle { get; set; }
             public string title { get; set; }
+            public string copyright { get; set; }
         }
     }
 }

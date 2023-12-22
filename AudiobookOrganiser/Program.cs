@@ -22,11 +22,13 @@ namespace AudiobookOrganiser
             if (args.Contains("-audible-sync"))
             {
                 SyncFromAudibleCli.Run();
+                CheckForCorruptedFiles.Run();
                 ConsoleEx.WriteColoured(ConsoleColor.Green, "\n\nDONE!");
             }
             else if (args.Contains("-update-tags-only"))
             {
                 CheckAndRewriteTags.Run();
+                CheckForCorruptedFiles.Run();
                 ConsoleEx.WriteColoured(ConsoleColor.Green, "\n\nDONE!");
             }
             else
@@ -40,6 +42,7 @@ namespace AudiobookOrganiser
                 SyncFromOpenAudibleDownloads.Run();
                 ConvertExistingMp3ToM4b.Run();
                 CheckAndRewriteTags.Run();
+                CheckForCorruptedFiles.Run();
 
                 ConsoleEx.WriteColoured(ConsoleColor.Green, "\n\nDONE!");
 

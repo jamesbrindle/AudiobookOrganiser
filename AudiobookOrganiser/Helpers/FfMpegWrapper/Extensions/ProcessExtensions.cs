@@ -72,7 +72,7 @@ namespace AudiobookOrganiser.Helpers.FfMpegWrapper.Extensions
         internal static string ExecuteProcessAndReadStdOut(
             string filePath,
             string arguments,
-            int timeoutMs = 1000)
+            int timeoutMs = 10000)
         {
             var _outputStringBuilder = new StringBuilder();
 

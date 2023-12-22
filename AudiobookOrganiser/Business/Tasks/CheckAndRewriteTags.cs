@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using static System.Extensions;
 
 namespace AudiobookOrganiser.Business.Tasks
@@ -16,8 +17,10 @@ namespace AudiobookOrganiser.Business.Tasks
                 "*.m4b",
                 SearchOption.AllDirectories);
 
-            foreach (var audioFilePath in m4bAudioFiles)
+            Parallel.ForEach(m4bAudioFiles, new ParallelOptions { MaxDegreeOfParallelism = 4 }, audioFilePath =>
+            {
                 PerformCheckAndRewriteTags(audioFilePath);
+            });
         }
 
         private static void PerformCheckAndRewriteTags(string audioFilePath)
@@ -26,8 +29,6 @@ namespace AudiobookOrganiser.Business.Tasks
             {
                 try
                 {
-
-
                     var metaOnlyFromFile = MetaDataReader.GetMetaData(audioFilePath, false, false, false, false, null, true);
                     var metaFromOtherSources = MetaDataReader.GetMetaData(audioFilePath, true, true, true, false, forOverwriting: true);
 
@@ -74,7 +75,16 @@ namespace AudiobookOrganiser.Business.Tasks
 
                     if (metaOnlyFromFile.Overview != metaFromOtherSources.Overview)
                     {
-                        changedList.Add("Overview");
+                        if (metaOnlyFromFile.Overview.Replace(" / ", "\r\n") != metaFromOtherSources.Overview)
+                        {
+                            changedList.Add("Overview");
+                            hasChanged = true;
+                        }
+                    }
+
+                    if (metaOnlyFromFile.Copyright != metaFromOtherSources.Copyright || metaFromOtherSources.Copyright.Contains("&#169;"))
+                    {
+                        changedList.Add("Copyright");
                         hasChanged = true;
                     }
 

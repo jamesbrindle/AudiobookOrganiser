@@ -97,11 +97,24 @@ namespace AudiobookOrganiser.Business
             if (!string.IsNullOrWhiteSpace(metaData.Asin))
                 tagLib.Tag.AmazonId = metaData.Asin;
 
+            tagLib.Tag.Track = metaData.Track;
+
             if (!string.IsNullOrWhiteSpace(metaData.Overview))
             {
-                tagLib.Tag.Comment = metaData.Overview;
-                tagLib.Tag.Description = metaData.Overview;
+                if (metaData.Overview.ToLower().StartsWith("chapter"))
+                {
+                    tagLib.Tag.Comment = string.Empty;
+                    tagLib.Tag.Description = string.Empty;
+                }
+                else
+                {
+                    tagLib.Tag.Comment = metaData.Overview;
+                    tagLib.Tag.Description = metaData.Overview;
+                }
             }
+
+            if (!string.IsNullOrEmpty(metaData.Copyright))
+                tagLib.Tag.Copyright = metaData.Copyright.Replace("&#169;", "©");
 
             if (!string.IsNullOrWhiteSpace(metaData.Year))
             {
@@ -174,13 +187,31 @@ namespace AudiobookOrganiser.Business
                 tagLib.Tag.AmazonId = metaData.asin;
             }
 
+            if (!string.IsNullOrWhiteSpace(metaData.copyright))
+            {
+                tagLib.Tag.Copyright = metaData.copyright.Replace("&#169;", "©");
+            }
+
             if (!string.IsNullOrWhiteSpace(metaData.release_date))
             {
-                try
+                if (metaData.release_date.Length == 4)
                 {
-                    tagLib.Tag.Year = (uint)Convert.ToInt32(Convert.ToDateTime(metaData.release_date));
+                    try
+                    {
+                        tagLib.Tag.Year = (uint)Convert.ToInt32(metaData.release_date);
+                    }
+                    catch
+                    { }
                 }
-                catch { }
+                else
+                {
+                    try
+                    {
+                        tagLib.Tag.Year = (uint)Convert.ToInt32(Convert.ToDateTime(metaData.release_date).Year);
+                    }
+                    catch
+                    { }
+                }
             }
 
             tagLib.Save();
