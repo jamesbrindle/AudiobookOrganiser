@@ -25,6 +25,9 @@ namespace AudiobookOrganiser.Business
         {
             var metaData = new AudiobookMetaData();
 
+            string pattern = @"(?<! )-( )";
+            string replacement = " - ";
+
             metaData = GetMetaDataByTags(metaData, audioFile, small, getProperGenre: getProperGenre);
 
             if (tryParseMetaFromReadarr)
@@ -44,6 +47,49 @@ namespace AudiobookOrganiser.Business
                 }
                 catch { }
             }
+           
+
+            if (tryParseMetaFromPath && !string.IsNullOrEmpty(libraryRootPath))
+                metaData = GetMetaDataByParsingFilePath(metaData, libraryRootPath, audioFile);
+
+            if (!string.IsNullOrEmpty(metaData.Author))
+                metaData.Author = new string(metaData.Author.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray()).Replace(";", ",");
+
+            if (!string.IsNullOrEmpty(metaData.Narrator))
+                metaData.Narrator = new string(metaData.Narrator.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray()).Replace(";", ",");
+
+            if (!string.IsNullOrEmpty(metaData.Title))
+            {
+                metaData.Title = new string(metaData.Title.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
+                metaData.Title = Regex.Replace(metaData.Title, pattern, replacement);
+            }
+
+            if (!string.IsNullOrEmpty(metaData.Series))
+            {
+                metaData.Series = new string(metaData.Series.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
+                metaData.Series = Regex.Replace(metaData.Series, pattern, replacement);
+            }
+
+            if (!string.IsNullOrEmpty(metaData.SeriesPart))
+                metaData.SeriesPart = new string(metaData.SeriesPart.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
+
+            if (!string.IsNullOrEmpty(metaData.Year))
+                metaData.Year = new string(metaData.Year.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
+
+            if (metaData.Author == null)
+                metaData.Author = string.Empty;
+
+            if (metaData.Title == null)
+                metaData.Title = string.Empty;
+
+            if (metaData.Series == null)
+                metaData.Series = string.Empty;
+
+            if (metaData.SeriesPart == null)
+                metaData.SeriesPart = string.Empty;
+
+            if (metaData.Narrator == null)
+                metaData.Narrator = string.Empty;
 
             if (string.IsNullOrEmpty(metaData.Album) || forOverwriting)
             {
@@ -74,42 +120,6 @@ namespace AudiobookOrganiser.Business
                         metaData.AlbumSort = $"{metaData.Series} - {metaData.Title}";
                 }
             }
-
-            if (tryParseMetaFromPath && !string.IsNullOrEmpty(libraryRootPath))
-                metaData = GetMetaDataByParsingFilePath(metaData, libraryRootPath, audioFile);
-
-            if (!string.IsNullOrEmpty(metaData.Author))
-                metaData.Author = new string(metaData.Author.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray()).Replace(";", ",");
-
-            if (!string.IsNullOrEmpty(metaData.Narrator))
-                metaData.Narrator = new string(metaData.Narrator.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray()).Replace(";", ",");
-
-            if (!string.IsNullOrEmpty(metaData.Title))
-                metaData.Title = new string(metaData.Title.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
-
-            if (!string.IsNullOrEmpty(metaData.Series))
-                metaData.Series = new string(metaData.Series.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
-
-            if (!string.IsNullOrEmpty(metaData.SeriesPart))
-                metaData.SeriesPart = new string(metaData.SeriesPart.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
-
-            if (!string.IsNullOrEmpty(metaData.Year))
-                metaData.Year = new string(metaData.Year.Select(ch => _invalidFileNameChars.Contains(ch) ? '-' : ch).ToArray());
-
-            if (metaData.Author == null)
-                metaData.Author = string.Empty;
-
-            if (metaData.Title == null)
-                metaData.Title = string.Empty;
-
-            if (metaData.Series == null)
-                metaData.Series = string.Empty;
-
-            if (metaData.SeriesPart == null)
-                metaData.SeriesPart = string.Empty;
-
-            if (metaData.Narrator == null)
-                metaData.Narrator = string.Empty;
 
             return metaData;
         }
