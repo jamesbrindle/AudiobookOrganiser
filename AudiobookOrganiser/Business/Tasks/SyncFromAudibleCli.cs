@@ -207,9 +207,8 @@ namespace AudiobookOrganiser.Business.Tasks
                                 ResolveAudibleFileDecryptionCodes(audioFile, ref conversionOptions);
 
                                 var metaData = MetaDataReader.GetMetaData(audioFile, false, true, true, false, null);
-                                var audibleBookProperties = audibleLibrary.Where(m => m.asin == metaData.Asin)?.FirstOrDefault();
 
-                                if (audibleBookProperties != null)
+                                if (metaData != null)
                                 {
                                     var engine = new FfMpeg(Program.FfMpegPath, Program.LibFDK_AAC_EncodingEnabled);
                                     Task.Run(() => engine.ConvertAsync(
@@ -218,7 +217,7 @@ namespace AudiobookOrganiser.Business.Tasks
                                         conversionOptions,
                                         cancelToken)).Wait();
 
-                                    MetaDataWriter.WriteMetaData(newPath, audibleBookProperties);
+                                    MetaDataWriter.WriteMetaData(newPath, metaData);
                                     CopyPdf(audioFile, newPath, false);
                                 }
                             }

@@ -2,6 +2,12 @@
 
 This a command line utility that 'organises' an audiobook collection to a particular file structure, as well as adding missing meta data and downloading from Audible using audible-cli and converting to M4b.
 
+
+** IMPORTANT **
+
+This solution is currently set to use the x64 MediaInfo.dll, so you need to target x64 when building. Both the x86 and x64 MeddiaInfo.dll's are in the 'Other Solution Files' solution folder.
+
+
 ## Likely Won't Serve Your Needs Out of the Box
 
 I create this simple console app just for myself, to organise my fairly large library of audiobooks, that, before organisating had a variety of weird and wonderful naming conversions, audio formats and missing audiobooks that were in my Audible library but not local, and missing meta data... Because I got bored.

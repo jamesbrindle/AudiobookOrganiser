@@ -16,6 +16,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "README.md", "README.md", "{
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MediaInfo.Dll", "MediaInfo.Dll", "{7AD6D3C3-3477-4D5D-851E-FDB95BB6B7A6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "x86", "x86", "{74A9729A-B068-4891-A70A-1DC52039AAA4}"
+	ProjectSection(SolutionItems) = preProject
+		Other Solution Files\MediaInfo.Dll\x86\MediaInfo.dll = Other Solution Files\MediaInfo.Dll\x86\MediaInfo.dll
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "x64", "x64", "{B45680CA-CE9C-485E-B460-443CBC53EB81}"
+	ProjectSection(SolutionItems) = preProject
+		Other Solution Files\MediaInfo.Dll\x64\MediaInfo.dll = Other Solution Files\MediaInfo.Dll\x64\MediaInfo.dll
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +47,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7AD6D3C3-3477-4D5D-851E-FDB95BB6B7A6} = {8D6E602D-5A0C-4013-8F89-355419E2C3F8}
+		{74A9729A-B068-4891-A70A-1DC52039AAA4} = {7AD6D3C3-3477-4D5D-851E-FDB95BB6B7A6}
+		{B45680CA-CE9C-485E-B460-443CBC53EB81} = {7AD6D3C3-3477-4D5D-851E-FDB95BB6B7A6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5BEAA1E8-0F01-45F7-8DB1-1B3091E7B0D8}
