@@ -462,9 +462,9 @@ namespace AudiobookOrganiser.Business
 
                 if (!string.IsNullOrEmpty(grouping))
                 {
-                    var match = Regex.Match(grouping, @"Book \d+");
+                    var match = Regex.Match(grouping, @"Book \d+(\.\d+)?");
                     if (!match.Success)
-                        match = Regex.Match(grouping, @"book \d+");
+                        match = Regex.Match(grouping, @"book \d+(\.\d+)?");
 
                     if (match.Success)
                     {
@@ -579,7 +579,7 @@ namespace AudiobookOrganiser.Business
                 if (!string.IsNullOrEmpty(metaData.Title) &&
                     metaData.Title.ToLower().Contains("book"))
                 {
-                    metaData.Title = Regex.Replace(metaData.Title, @", Book \d+", "")
+                    metaData.Title = Regex.Replace(metaData.Title, @", Book \d+(\.\d+)?", "")
                                           .Trim();
                 }
             }
