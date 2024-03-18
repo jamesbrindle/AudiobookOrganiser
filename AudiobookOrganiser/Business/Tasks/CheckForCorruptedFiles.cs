@@ -56,6 +56,7 @@ namespace AudiobookOrganiser.Business.Tasks
 
         public static bool IsFileLocked(string path)
         {
+
             // it must exist for it to be locked
             if (File.Exists(path))
             {
