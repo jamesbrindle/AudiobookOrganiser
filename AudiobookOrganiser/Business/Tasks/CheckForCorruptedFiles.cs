@@ -45,8 +45,43 @@ namespace AudiobookOrganiser.Business.Tasks
 
         private static bool IsCorrupted(string filePath)
         {
-            var probe = new FfProbe(Program.FfProbePath);
-            return probe.GetIsInvalidData(filePath);
+            if (File.Exists(filePath) && !IsFileLocked(filePath))
+            {
+                var probe = new FfProbe(Program.FfProbePath);
+                return probe.GetIsInvalidData(filePath);
+            }
+
+            return false;
+        }
+
+        public static bool IsFileLocked(string path)
+        {
+            // it must exist for it to be locked
+            if (File.Exists(path))
+            {
+                FileInfo file = new FileInfo(path);
+                FileStream stream = null;
+
+                try
+                {
+                    stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.None);
+                }
+                catch (IOException)
+                {
+                    //the file is unavailable because it is:
+                    //still being written to
+                    //or being processed by another thread
+                    //or does not exist (has already been processed)
+                    return true;
+                }
+                finally
+                {
+                    stream?.Close();
+                }
+            }
+
+            //file is not locked
+            return false;
         }
     }
 }
