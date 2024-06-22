@@ -171,7 +171,7 @@ namespace AudiobookOrganiser.Business.Tasks
 
                 Parallel.ForEach(
                     Directory.GetFiles(Program.AudibleCliSyncPath, "*.*", SearchOption.AllDirectories).AsParallel(),
-                    new ParallelOptions { MaxDegreeOfParallelism = 2 },
+                    new ParallelOptions { MaxDegreeOfParallelism = 1 },
                     audioFile =>
                 {
                     if (Path.GetDirectoryName(audioFile) != convertedPath)
@@ -218,6 +218,25 @@ namespace AudiobookOrganiser.Business.Tasks
                                         cancelToken)).Wait();
 
                                     MetaDataWriter.WriteMetaData(newPath, metaData);
+
+                                    if (CheckForCorruptedFiles.IsCorrupted(newPath))
+                                    {
+                                        try
+                                        {
+                                            File.Delete(newPath);
+
+                                            engine = new FfMpeg(Program.FfMpegPath, Program.LibFDK_AAC_EncodingEnabled);
+                                            Task.Run(() => engine.ConvertAsync(
+                                                new MediaFile(audioFile),
+                                                new MediaFile(newPath),
+                                                conversionOptions,
+                                                cancelToken)).Wait();
+
+                                            MetaDataWriter.WriteMetaData(newPath, metaData, true);
+                                        }
+                                        catch { }
+                                    }
+
                                     CopyPdf(audioFile, newPath, false);
                                 }
                             }

@@ -43,7 +43,7 @@ namespace AudiobookOrganiser.Business.Tasks
             }
         }
 
-        private static bool IsCorrupted(string filePath)
+        public static bool IsCorrupted(string filePath)
         {
             if (File.Exists(filePath) && !IsFileLocked(filePath))
             {
