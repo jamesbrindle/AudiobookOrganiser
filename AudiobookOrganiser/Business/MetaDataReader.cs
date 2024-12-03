@@ -183,9 +183,6 @@ namespace AudiobookOrganiser.Business
                                         : " ") +
                                         "(Narrated - " + LibraryPathHelper.GetSingleNarrator(metaData.Narrator) + ")")
                             + Path.GetExtension(audioFilePath);
-
-                        if ((Path.GetDirectoryName(audioFilePath) + "\\" + newFilename).Length > 255)
-                            newFilename = Path.GetFileName(audioFilePath);
                     }
                 }
             }
