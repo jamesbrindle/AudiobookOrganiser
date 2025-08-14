@@ -1,4 +1,6 @@
 ﻿using AudiobookOrganiser.Helpers;
+using AudiobookOrganiser.Models;
+using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Linq;
@@ -24,7 +26,10 @@ namespace AudiobookOrganiser.Business.Tasks
                 {
                     try
                     {
-                        var metaData = MetaDataReader.GetMetaData(audioFilePath, true, true, true, false, libraryRootPath);
+                        var audibleLibrary = JsonConvert.DeserializeObject<AudibleLibrary.Property[]>
+                            (File.ReadAllText(Program.LibraryExportName));
+
+                        var metaData = MetaDataReader.GetMetaData(audioFilePath, true, true, true, false, libraryRootPath, audibleLibrary: audibleLibrary);
 
                         if (!string.IsNullOrEmpty(metaData.Author) && !string.IsNullOrEmpty(metaData.Title))
                         {
@@ -54,7 +59,7 @@ namespace AudiobookOrganiser.Business.Tasks
 
                             if (newFilename.Length > 255)
                             {
-                                metaData = MetaDataReader.GetMetaData(audioFilePath, true, true, true, true, libraryRootPath);
+                                metaData = MetaDataReader.GetMetaData(audioFilePath, true, true, true, true, libraryRootPath, audibleLibrary: audibleLibrary);
 
                                 newFilename = Path.Combine(
                                     outputDirectory,

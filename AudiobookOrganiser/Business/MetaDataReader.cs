@@ -21,7 +21,8 @@ namespace AudiobookOrganiser.Business
             bool small,
             string libraryRootPath = null,
             bool getProperGenre = false,
-            bool forOverwriting = false)
+            bool forOverwriting = false,
+            AudibleLibrary.Property[] audibleLibrary = null)
         {
             var metaData = new AudiobookMetaData();
 
@@ -29,6 +30,15 @@ namespace AudiobookOrganiser.Business
             string replacement = " - ";
 
             metaData = GetMetaDataByTags(metaData, audioFile, small, getProperGenre: getProperGenre);
+
+            if (audibleLibrary != null)
+            {
+                try
+                {
+                    metaData = GetMetaFromAudibleFile(metaData, audibleLibrary);
+                }
+                catch { }
+            }
 
             if (tryParseMetaFromReadarr)
             {
@@ -47,7 +57,6 @@ namespace AudiobookOrganiser.Business
                 }
                 catch { }
             }
-           
 
             if (tryParseMetaFromPath && !string.IsNullOrEmpty(libraryRootPath))
                 metaData = GetMetaDataByParsingFilePath(metaData, libraryRootPath, audioFile);
@@ -124,14 +133,12 @@ namespace AudiobookOrganiser.Business
             return metaData;
         }
 
-        public static string GetAudiobookTitle(string audioFilePath)
+        public static string GetAudiobookTitle(string audioFilePath, AudiobookMetaData metaData)
         {
             string newFilename = Path.GetFileName(audioFilePath);
 
             try
             {
-                var metaData = GetMetaData(audioFilePath, true, true, true, false, null);
-
                 if (!string.IsNullOrEmpty(metaData.Author) && !string.IsNullOrEmpty(metaData.Title))
                 {
                     newFilename =
@@ -154,7 +161,7 @@ namespace AudiobookOrganiser.Business
                                 : (string.IsNullOrEmpty(metaData.Year)
                                     ? ""
                                     : " ") +
-                                    "(Narrated - " + LibraryPathHelper.GetSingleNarrator(metaData.Narrator) + ")")
+                                    "(Narrated - " + metaData.Narrator + ")")
                         + Path.GetExtension(audioFilePath);
 
                     if ((Path.GetDirectoryName(audioFilePath) + "\\" + newFilename).Length > 255)
@@ -513,18 +520,6 @@ namespace AudiobookOrganiser.Business
                                     .Replace("  ", " ")
                                     .Trim();
 
-            // Copyright
-
-            if (string.IsNullOrEmpty(metaData.Copyright))
-                metaData.Copyright = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Copyright"))?
-                                    .Replace("  ", " ")
-                                    .Trim();
-
-            if (string.IsNullOrEmpty(metaData.Copyright))
-                metaData.Copyright = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "COPYRIGHT"))?
-                                    .Replace("  ", " ")
-                                    .Trim();          
-
             if (getProperGenre)
             {
                 if (string.IsNullOrEmpty(metaData.Genre))
@@ -535,6 +530,18 @@ namespace AudiobookOrganiser.Business
                 if (metaData.Genre != null && metaData.Genre == "Audiobook")
                     metaData.Genre = string.Empty;
             }
+
+            // Copyright
+
+            if (string.IsNullOrEmpty(metaData.Copyright))
+                metaData.Copyright = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "Copyright"))?
+                                    .Replace("  ", " ")
+                                    .Trim();
+
+            if (string.IsNullOrEmpty(metaData.Copyright))
+                metaData.Copyright = string.Join(", ", mediaInfo.Get(MediaInfoLib.StreamKind.General, 0, "COPYRIGHT"))?
+                                    .Replace("  ", " ")
+                                    .Trim();
 
             // Track
 
@@ -835,6 +842,37 @@ namespace AudiobookOrganiser.Business
                     if (!string.IsNullOrEmpty(metaData.Year))
                         break;
                 }
+            }
+
+            return metaData;
+        }
+
+        private static AudiobookMetaData GetMetaFromAudibleFile(
+           AudiobookMetaData metaData,
+           AudibleLibrary.Property[] audibleFile)
+        {
+            if (string.IsNullOrEmpty(metaData.Asin))
+                return metaData;
+
+            var book = audibleFile.Where(m => m.asin == metaData.Asin)?.FirstOrDefault();
+            if (book != null)
+            {
+                metaData.Title = book.title;
+
+                if (!string.IsNullOrEmpty(book.narrators))
+                    metaData.Narrator = book.narrators;
+
+                if (string.IsNullOrEmpty(metaData.SeriesPart) && !string.IsNullOrEmpty(book.series_sequence))
+                    metaData.SeriesPart = book.series_sequence;
+
+                if (!string.IsNullOrEmpty(book.series_title))
+                    metaData.Series = book.series_title;
+
+                if (string.IsNullOrEmpty(metaData.Author) && !string.IsNullOrEmpty(book.authors))
+                    metaData.Author = book.authors;
+
+                if (string.IsNullOrEmpty(metaData.Genre) && !string.IsNullOrEmpty(book.genres))
+                    metaData.Genre = book.genres;
             }
 
             return metaData;

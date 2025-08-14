@@ -1,7 +1,6 @@
 ﻿using AudiobookOrganiser.Helpers.ToneWrapper;
 using AudiobookOrganiser.Models;
 using System;
-using System.Management.Instrumentation;
 using System.Threading;
 
 namespace AudiobookOrganiser.Business
@@ -10,13 +9,38 @@ namespace AudiobookOrganiser.Business
     {
         internal static void WriteMetaData(string audioPath, AudiobookMetaData metaData, bool useTone = false)
         {
-            try
+            if (!useTone)
             {
-                WriteMetaDataActual(audioPath, metaData, useTone);
+                bool success = false;
+                for (int i = 0; i < 5; i++)
+                {
+                    try
+                    {
+                        Thread.Sleep(3000);
+                        WriteMetaDataActual(audioPath, metaData, useTone);
+                        success = true;
+                        break;
+                    }
+                    catch
+                    {
+                        Thread.Sleep(5000);
+                    }
+                }
+
+                if (!success)
+                    WriteMetaDataActual(audioPath, metaData, true);
             }
-            catch
+            else
             {
-                Thread.Sleep(1000);
+                try
+                {
+                    Thread.Sleep(3000);
+                    WriteMetaDataActual(audioPath, metaData, useTone);
+                }
+                catch
+                {
+                    Thread.Sleep(1000);
+                }
             }
         }
 
@@ -27,110 +51,110 @@ namespace AudiobookOrganiser.Business
 
             if (!useTone)
             {
-                var tagLib = TagLib.File.Create(audioPath);
-
-                if (!string.IsNullOrWhiteSpace(metaData.Title))
-                    tagLib.Tag.Title = metaData.Title;
-
-                if (!string.IsNullOrEmpty(metaData.Author))
+                using (var tagLib = TagLib.File.Create(audioPath))
                 {
-                    tagLib.Tag.AlbumArtists = metaData.Author?.Split(',');
-                    if (tagLib.Tag.AlbumArtists != null && tagLib.Tag.AlbumArtists.Length > 0)
-                        for (int i = 0; i < tagLib.Tag.AlbumArtists.Length; i++)
-                            tagLib.Tag.AlbumArtists[0] = tagLib.Tag.AlbumArtists[0].Trim();
+                    if (!string.IsNullOrWhiteSpace(metaData.Title))
+                        tagLib.Tag.Title = metaData.Title;
 
-                    tagLib.Tag.Performers = metaData.Author?.Split(',');
-                    if (tagLib.Tag.Performers != null && tagLib.Tag.Performers.Length > 0)
-                        for (int i = 0; i < tagLib.Tag.Performers.Length; i++)
-                            tagLib.Tag.Performers[0] = tagLib.Tag.Performers[0].Trim();
-                }
-
-                if (!string.IsNullOrEmpty(metaData.Narrator))
-                {
-                    tagLib.Tag.Composers = metaData.Narrator.Split(',');
-                    if (tagLib.Tag.Composers != null && tagLib.Tag.Composers.Length > 0)
-                        for (int i = 0; i < tagLib.Tag.Composers.Length; i++)
-                            tagLib.Tag.Composers[0] = tagLib.Tag.Composers[0].Trim();
-
-                }
-
-                tagLib.Tag.Genres = new string[] { "Audiobook" };
-
-                if (!string.IsNullOrWhiteSpace(metaData.Series))
-                {
-                    if (!string.IsNullOrWhiteSpace(metaData.SeriesPart) && metaData.SeriesPart != "0")
-                        tagLib.Tag.Grouping = $"Book {metaData.SeriesPart}, {metaData.Series}";
-                    else
-                        tagLib.Tag.Grouping = $"{metaData.Series}";
-                }
-
-                if (string.IsNullOrWhiteSpace(metaData.Album))
-                {
-                    if (string.IsNullOrEmpty(metaData.Series))
+                    if (!string.IsNullOrEmpty(metaData.Author))
                     {
-                        tagLib.Tag.Album = metaData.Title;
+                        tagLib.Tag.AlbumArtists = metaData.Author?.Split(',');
+                        if (tagLib.Tag.AlbumArtists != null && tagLib.Tag.AlbumArtists.Length > 0)
+                            for (int i = 0; i < tagLib.Tag.AlbumArtists.Length; i++)
+                                tagLib.Tag.AlbumArtists[0] = tagLib.Tag.AlbumArtists[0].Trim();
+
+                        tagLib.Tag.Performers = metaData.Author?.Split(',');
+                        if (tagLib.Tag.Performers != null && tagLib.Tag.Performers.Length > 0)
+                            for (int i = 0; i < tagLib.Tag.Performers.Length; i++)
+                                tagLib.Tag.Performers[0] = tagLib.Tag.Performers[0].Trim();
                     }
-                    else
+
+                    if (!string.IsNullOrEmpty(metaData.Narrator))
                     {
-                        if (!string.IsNullOrEmpty(metaData.SeriesPart))
-                            tagLib.Tag.Album = $"{metaData.Title}: {metaData.Series}, Book {metaData.SeriesPart}";
+                        tagLib.Tag.Composers = metaData.Narrator.Split(',');
+                        if (tagLib.Tag.Composers != null && tagLib.Tag.Composers.Length > 0)
+                            for (int i = 0; i < tagLib.Tag.Composers.Length; i++)
+                                tagLib.Tag.Composers[0] = tagLib.Tag.Composers[0].Trim();
+
+                    }
+
+                    tagLib.Tag.Genres = new string[] { "Audiobook" };
+
+                    if (!string.IsNullOrWhiteSpace(metaData.Series))
+                    {
+                        if (!string.IsNullOrWhiteSpace(metaData.SeriesPart) && metaData.SeriesPart != "0")
+                            tagLib.Tag.Grouping = $"Book {metaData.SeriesPart}, {metaData.Series}";
                         else
-                            tagLib.Tag.Album = $"{metaData.Title}: {metaData.Series}";
+                            tagLib.Tag.Grouping = $"{metaData.Series}";
                     }
-                }
-                else
-                    tagLib.Tag.Album = metaData.Album;
 
-                if (string.IsNullOrWhiteSpace(metaData.AlbumSort))
-                {
-                    if (string.IsNullOrEmpty(metaData.Series))
+                    if (string.IsNullOrWhiteSpace(metaData.Album))
                     {
-                        tagLib.Tag.AlbumSort = metaData.Title;
-                    }
-                    else
-                    {
-                        if (!string.IsNullOrEmpty(metaData.SeriesPart))
-                            tagLib.Tag.AlbumSort = $"{metaData.Series}, Book {metaData.SeriesPart} - {metaData.Title}";
+                        if (string.IsNullOrEmpty(metaData.Series))
+                        {
+                            tagLib.Tag.Album = metaData.Title;
+                        }
                         else
-                            tagLib.Tag.AlbumSort = $"{metaData.Series} - {metaData.Title}";
-                    }
-                }
-                else
-                    tagLib.Tag.AlbumSort = metaData.AlbumSort;
-
-                if (!string.IsNullOrWhiteSpace(metaData.Asin))
-                    tagLib.Tag.AmazonId = metaData.Asin;
-
-                tagLib.Tag.Track = metaData.Track;
-
-                if (!string.IsNullOrWhiteSpace(metaData.Overview))
-                {
-                    if (metaData.Overview.ToLower().StartsWith("chapter"))
-                    {
-                        tagLib.Tag.Comment = string.Empty;
-                        tagLib.Tag.Description = string.Empty;
+                        {
+                            if (!string.IsNullOrEmpty(metaData.SeriesPart))
+                                tagLib.Tag.Album = $"{metaData.Title}: {metaData.Series}, Book {metaData.SeriesPart}";
+                            else
+                                tagLib.Tag.Album = $"{metaData.Title}: {metaData.Series}";
+                        }
                     }
                     else
+                        tagLib.Tag.Album = metaData.Album;
+
+                    if (string.IsNullOrWhiteSpace(metaData.AlbumSort))
                     {
-                        tagLib.Tag.Comment = metaData.Overview;
-                        tagLib.Tag.Description = metaData.Overview;
+                        if (string.IsNullOrEmpty(metaData.Series))
+                        {
+                            tagLib.Tag.AlbumSort = metaData.Title;
+                        }
+                        else
+                        {
+                            if (!string.IsNullOrEmpty(metaData.SeriesPart))
+                                tagLib.Tag.AlbumSort = $"{metaData.Series}, Book {metaData.SeriesPart} - {metaData.Title}";
+                            else
+                                tagLib.Tag.AlbumSort = $"{metaData.Series} - {metaData.Title}";
+                        }
                     }
-                }
+                    else
+                        tagLib.Tag.AlbumSort = metaData.AlbumSort;
 
-                if (!string.IsNullOrEmpty(metaData.Copyright))
-                    tagLib.Tag.Copyright = metaData.Copyright.Replace("&#169;", "©");
+                    if (!string.IsNullOrWhiteSpace(metaData.Asin))
+                        tagLib.Tag.AmazonId = metaData.Asin;
 
-                if (!string.IsNullOrWhiteSpace(metaData.Year))
-                {
-                    try
+                    tagLib.Tag.Track = metaData.Track;
+
+                    if (!string.IsNullOrWhiteSpace(metaData.Overview))
                     {
-                        tagLib.Tag.Year = (uint)Convert.ToInt32(metaData.Year);
+                        if (metaData.Overview.ToLower().StartsWith("chapter"))
+                        {
+                            tagLib.Tag.Comment = string.Empty;
+                            tagLib.Tag.Description = string.Empty;
+                        }
+                        else
+                        {
+                            tagLib.Tag.Comment = metaData.Overview;
+                            tagLib.Tag.Description = metaData.Overview;
+                        }
                     }
-                    catch { }
-                }
 
-                tagLib.Save();
-                tagLib.Dispose();
+                    if (!string.IsNullOrEmpty(metaData.Copyright))
+                        tagLib.Tag.Copyright = metaData.Copyright.Replace("&#169;", "©");
+
+                    if (!string.IsNullOrWhiteSpace(metaData.Year))
+                    {
+                        try
+                        {
+                            tagLib.Tag.Year = (uint)Convert.ToInt32(metaData.Year);
+                        }
+                        catch { }
+                    }
+
+                    tagLib.Save();
+                }
             }
             else
             {

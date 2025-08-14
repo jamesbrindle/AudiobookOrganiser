@@ -1,7 +1,8 @@
-﻿using System;
+﻿using AudiobookOrganiser.Models;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 using static System.Extensions;
 
 namespace AudiobookOrganiser.Business.Tasks
@@ -17,10 +18,8 @@ namespace AudiobookOrganiser.Business.Tasks
                 "*.m4b",
                 SearchOption.AllDirectories);
 
-            Parallel.ForEach(m4bAudioFiles, new ParallelOptions { MaxDegreeOfParallelism = 4 }, audioFilePath =>
-            {
+            foreach (var audioFilePath in m4bAudioFiles)
                 PerformCheckAndRewriteTags(audioFilePath);
-            });
         }
 
         private static void PerformCheckAndRewriteTags(string audioFilePath)
@@ -29,8 +28,16 @@ namespace AudiobookOrganiser.Business.Tasks
             {
                 try
                 {
+                    if (!Directory.Exists(Program.AudibleCliSyncPath))
+                        Directory.CreateDirectory(Program.AudibleCliSyncPath);
+
+                    var _libraryExportPath = Path.Combine(Program.AudibleCliSyncPath, Program.LibraryExportName);
+
+                    var audibleLibrary = JsonConvert.DeserializeObject<AudibleLibrary.Property[]>
+                        (File.ReadAllText(_libraryExportPath));
+
                     var metaOnlyFromFile = MetaDataReader.GetMetaData(audioFilePath, false, false, false, false, null, true);
-                    var metaFromOtherSources = MetaDataReader.GetMetaData(audioFilePath, true, true, true, false, forOverwriting: true);
+                    var metaFromOtherSources = MetaDataReader.GetMetaData(audioFilePath, true, true, true, false, forOverwriting: true, audibleLibrary: audibleLibrary);
 
                     metaFromOtherSources.ProperGenre = "Audiobook";
 

@@ -2,7 +2,6 @@
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Windows.Navigation;
 
 namespace AudiobookOrganiser.Helpers.FfMpegWrapper
 {
@@ -55,7 +54,7 @@ namespace AudiobookOrganiser.Helpers.FfMpegWrapper
                 if (output.ToLower().Contains("invalid data found when processing input"))
                     return true;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 var _ = e;
 #if DEBUG

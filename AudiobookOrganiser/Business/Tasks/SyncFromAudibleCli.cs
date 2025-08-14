@@ -5,7 +5,6 @@ using AudiobookOrganiser.Models;
 using Newtonsoft.Json;
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using static System.Extensions;
@@ -14,8 +13,6 @@ namespace AudiobookOrganiser.Business.Tasks
 {
     internal class SyncFromAudibleCli
     {
-        private static readonly string _libraryExportName = "audible-library.json";
-        private static readonly string _libraryLastDownloadName = "audible-library-last-download.txt";
         private static string _libraryExportPath = string.Empty;
 
         public static void Run()
@@ -25,7 +22,7 @@ namespace AudiobookOrganiser.Business.Tasks
             if (!Directory.Exists(Program.AudibleCliSyncPath))
                 Directory.CreateDirectory(Program.AudibleCliSyncPath);
 
-            _libraryExportPath = Path.Combine(Program.AudibleCliSyncPath, _libraryExportName);
+            _libraryExportPath = Path.Combine(Program.AudibleCliSyncPath, Program.LibraryExportName);
 
             try
             {
@@ -118,7 +115,7 @@ namespace AudiobookOrganiser.Business.Tasks
 
         private static DateTime? GetLastLibraryDownloadDate()
         {
-            string libraryLastDownloadPath = Path.Combine(Program.AudibleCliSyncPath, _libraryLastDownloadName);
+            string libraryLastDownloadPath = Path.Combine(Program.AudibleCliSyncPath, Program.LibraryLastDownloadName);
 
             if (!File.Exists(libraryLastDownloadPath))
                 return null;
@@ -148,7 +145,7 @@ namespace AudiobookOrganiser.Business.Tasks
         {
             ConsoleEx.WriteColouredLine(ConsoleColor.White, "Logging last sync date...");
 
-            string libraryLastDownloadPath = Path.Combine(Program.AudibleCliSyncPath, _libraryLastDownloadName);
+            string libraryLastDownloadPath = Path.Combine(Program.AudibleCliSyncPath, Program.LibraryLastDownloadName);
             File.WriteAllText(
                 libraryLastDownloadPath,
                 DateTime.Now.ToString("yyyy-MM-dd"));
@@ -169,10 +166,8 @@ namespace AudiobookOrganiser.Business.Tasks
                 if (!Directory.Exists(convertedPath))
                     Directory.CreateDirectory(convertedPath);
 
-                Parallel.ForEach(
-                    Directory.GetFiles(Program.AudibleCliSyncPath, "*.*", SearchOption.AllDirectories).AsParallel(),
-                    new ParallelOptions { MaxDegreeOfParallelism = 1 },
-                    audioFile =>
+                foreach (var audioFile in Directory.GetFiles(
+                    Program.AudibleCliSyncPath, "*.*", SearchOption.AllDirectories))
                 {
                     if (Path.GetDirectoryName(audioFile) != convertedPath)
                     {
@@ -206,7 +201,7 @@ namespace AudiobookOrganiser.Business.Tasks
 
                                 ResolveAudibleFileDecryptionCodes(audioFile, ref conversionOptions);
 
-                                var metaData = MetaDataReader.GetMetaData(audioFile, false, true, true, false, null);
+                                var metaData = MetaDataReader.GetMetaData(audioFile, false, true, true, false, null, audibleLibrary: audibleLibrary);
 
                                 if (metaData != null)
                                 {
@@ -242,7 +237,7 @@ namespace AudiobookOrganiser.Business.Tasks
                             }
                         }
                     }
-                });
+                }
             }
         }
 
@@ -317,25 +312,18 @@ namespace AudiobookOrganiser.Business.Tasks
         {
             ConsoleEx.WriteColouredLine(ConsoleColor.White, "Copying to library folder...");
 
-#if DEBUG
-            int maxDegreeOfParallelism = 1;
-#else
-            int maxDegreeOfParallelism = 4;
-#endif
-
-            Parallel.ForEach(
-                   Directory.GetFiles(
-                        Path.Combine(
-                            Program.AudibleCliSyncPath,
-                            "Converted"),
-                            "*.m4b",
-                            SearchOption.AllDirectories).AsParallel(),
-                   new ParallelOptions { MaxDegreeOfParallelism = maxDegreeOfParallelism }, audioFile =>
+            foreach (var audioFile in Directory.GetFiles(
+                Path.Combine(Program.AudibleCliSyncPath, "Converted"),
+                "*.m4b",
+                SearchOption.AllDirectories))
             {
                 try
                 {
-                    var metaData = MetaDataReader.GetMetaData(audioFile, false, false, false, false, null);
-                    string audioBookTitle = MetaDataReader.GetAudiobookTitle(audioFile);
+                    var audibleLibrary = JsonConvert.DeserializeObject<AudibleLibrary.Property[]>
+                        (File.ReadAllText(_libraryExportPath));
+
+                    var metaData = MetaDataReader.GetMetaData(audioFile, false, true, true, false, null, audibleLibrary: audibleLibrary);
+                    string audioBookTitle = MetaDataReader.GetAudiobookTitle(audioFile, metaData);
                     string mp3Path = string.Empty;
                     string copyToPath = string.Empty;
                     bool fileAlreadyPresent = false;
@@ -397,7 +385,7 @@ namespace AudiobookOrganiser.Business.Tasks
                     }
                 }
                 catch { }
-            });
+            }
         }
     }
 }

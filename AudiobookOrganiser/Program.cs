@@ -74,6 +74,8 @@ namespace AudiobookOrganiser
             = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "ffprobe.exe");
         internal static bool LibFDK_AAC_EncodingEnabled { get; set; }
            = ConfigurationManager.AppSettings["LibFDK_AAC_EncodingEnabled"].Trim().ToLower().In("yes", "true", "1");
+        internal static string LibraryExportName { get; set; } = "audible-library.json";
+        internal static string LibraryLastDownloadName { get; set; } = "audible-library-last-download.txt";
 
         private static string _tempReadarrDbPath = null;
         internal static string ReadarrDbPath
