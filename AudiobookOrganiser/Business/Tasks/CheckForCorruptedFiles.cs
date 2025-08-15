@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using static System.Extensions;
 
@@ -20,7 +21,10 @@ namespace AudiobookOrganiser.Business.Tasks
                 "*.m4b",
                 SearchOption.AllDirectories);
 
-            Parallel.ForEach(m4bAudioFiles, new ParallelOptions { MaxDegreeOfParallelism = 2 }, audioFilePath =>
+            Parallel.ForEach(
+                m4bAudioFiles,
+                new ParallelOptions { MaxDegreeOfParallelism = 4 },
+                audioFilePath =>
             {
                 if (IsCorrupted(audioFilePath))
                     m_corruptedFiles.Add(audioFilePath);
@@ -28,7 +32,9 @@ namespace AudiobookOrganiser.Business.Tasks
 
             if (m_corruptedFiles != null && m_corruptedFiles.Count > 0)
             {
-                string filepath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "AudiobookOrganiser Corrupted Files.txt");
+                string filepath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                    "AudiobookOrganiser Corrupted Files.txt");
 
                 try
                 {
@@ -39,7 +45,7 @@ namespace AudiobookOrganiser.Business.Tasks
                 File.WriteAllText(
                     filepath,
                     "The following files are found to be corrupt and need to be processed manually:\n\n" +
-                    String.Join(Environment.NewLine, m_corruptedFiles));
+                    string.Join(Environment.NewLine, m_corruptedFiles));
             }
         }
 
@@ -48,7 +54,27 @@ namespace AudiobookOrganiser.Business.Tasks
             if (File.Exists(filePath) && !IsFileLocked(filePath))
             {
                 var probe = new FfProbe(Program.FfProbePath);
-                return probe.GetIsInvalidData(filePath);
+                bool valid = probe.GetIsInvalidData(filePath);
+
+                // Maybe file path too long, copy to a temp path and try again
+
+                if (!valid)
+                {
+                    string tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".mp4");
+                    File.Copy(filePath, tempPath);
+
+                    Thread.Sleep(1000);
+                    valid = probe.GetIsInvalidData(tempPath);
+                    Thread.Sleep(1000);
+
+                    try
+                    {
+                        File.Delete(tempPath);
+                    }
+                    catch { }
+
+                    return valid;
+                }
             }
 
             return false;
@@ -68,10 +94,10 @@ namespace AudiobookOrganiser.Business.Tasks
                 }
                 catch (IOException)
                 {
-                    //the file is unavailable because it is:
-                    //still being written to
-                    //or being processed by another thread
-                    //or does not exist (has already been processed)
+                    // The file is unavailable because it is:
+                    // still being written to
+                    // or being processed by another thread
+                    // or does not exist (has already been processed)
                     return true;
                 }
                 finally

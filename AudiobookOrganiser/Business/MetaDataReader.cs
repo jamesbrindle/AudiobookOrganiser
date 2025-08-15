@@ -18,7 +18,7 @@ namespace AudiobookOrganiser.Business
             bool tryParseMetaFromPath,
             bool tryParseMetaFromReadarr,
             bool tryParseMetaFromOpenAudible,
-            bool small,
+            bool smallerFileName,
             string libraryRootPath = null,
             bool getProperGenre = false,
             bool forOverwriting = false,
@@ -29,7 +29,7 @@ namespace AudiobookOrganiser.Business
             string pattern = @"(?<! )-( )";
             string replacement = " - ";
 
-            metaData = GetMetaDataByTags(metaData, audioFile, small, getProperGenre: getProperGenre);
+            metaData = GetMetaDataByTags(metaData, audioFile, smallerFileName, getProperGenre: getProperGenre);
 
             if (audibleLibrary != null)
             {
@@ -201,7 +201,7 @@ namespace AudiobookOrganiser.Business
         private static AudiobookMetaData GetMetaDataByTags(
             AudiobookMetaData metaData,
             string audioFilePath,
-            bool small,
+            bool smallerFileName,
             bool getProperGenre = false)
         {
             var mediaInfo = new MediaInfoLib.MediaInfo();
@@ -625,7 +625,7 @@ namespace AudiobookOrganiser.Business
                     metaData.Year = null;
             }
 
-            if (small)
+            if (smallerFileName)
             {
                 if (!string.IsNullOrEmpty(metaData.Author) && metaData.Author.Contains(","))
                 {
@@ -858,6 +858,41 @@ namespace AudiobookOrganiser.Business
             if (book != null)
             {
                 metaData.Title = book.title;
+
+                // Cleaning up
+
+                try
+                {
+                    if (!string.IsNullOrEmpty(metaData.Title) &&
+                        metaData.Title.ToLower().Contains("book"))
+                    {
+                        metaData.Title = Regex.Replace(metaData.Title, @", Book \d+(\.\d+)?", "")
+                                              .Trim();
+                    }
+                }
+                catch { }
+
+                try
+                {
+                    if (!string.IsNullOrEmpty(metaData.Title) &&
+                        metaData.Title.Contains($" (Narrated by {metaData.Narrator ?? ""})"))
+                    {
+                        metaData.Title = metaData.Title.Replace($" (Narrated by {metaData.Narrator ?? ""})", "")
+                                                       .Trim();
+                    }
+                }
+                catch { }
+
+                try
+                {
+                    if (!string.IsNullOrEmpty(metaData.Title) &&
+                        metaData.Title.Contains($" (Narrated By {metaData.Narrator ?? ""})"))
+                    {
+                        metaData.Title = metaData.Title.Replace($" (Narrated By {metaData.Narrator ?? ""})", "")
+                                                       .Trim();
+                    }
+                }
+                catch { }
 
                 if (!string.IsNullOrEmpty(book.narrators))
                     metaData.Narrator = book.narrators;

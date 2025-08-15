@@ -109,6 +109,7 @@
     <Compile Include="Business\Tasks\CheckAndRewriteTags.cs" />
     <Compile Include="Business\Tasks\CheckForCorruptedFiles.cs" />
     <Compile Include="Business\Tasks\ConvertExistingMp3ToM4b.cs" />
+    <Compile Include="Business\Tasks\LockInAudiobooks.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Helpers\DbHelper.cs" />
     <Compile Include="Helpers\FfMpegWrapper\CombineOptions.cs" />
@@ -203,6 +204,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
     <Compile Include="Models\AudibleLibrary.cs" />
+    <Compile Include="Models\LockInModel.cs" />
     <Compile Include="Models\MetaData.cs" />
     <Compile Include="Models\OpenAudibleBook.cs" />
     <Compile Include="Program.cs" />

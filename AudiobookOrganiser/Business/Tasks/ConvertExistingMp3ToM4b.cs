@@ -12,7 +12,7 @@ namespace AudiobookOrganiser.Business.Tasks
 {
     internal class ConvertExistingMp3ToM4b
     {
-        private static string _mainRootDir = null;
+        private static string _mainRootDir = new DirectoryInfo(Program.LibraryRootPaths[0]).Parent.FullName;
         private static double? _overrideTotalMediaSeconds = null;
         private static ProgressBar _progress = null;
 
@@ -20,11 +20,15 @@ namespace AudiobookOrganiser.Business.Tasks
         {
             ConsoleEx.WriteColouredLine(ConsoleColor.Yellow, "\nConverting and retagging existing MP3 to M4B...\n");
 
-            _mainRootDir = new DirectoryInfo(Program.LibraryRootPaths[0]).Parent.FullName;
-
             foreach (var mp3AudioFile in Directory.GetFiles(_mainRootDir, "*.mp3", SearchOption.AllDirectories))
             {
-                var mp3MetaTags = MetaDataReader.GetMetaData(mp3AudioFile, true, true, true, false, Path.GetDirectoryName(mp3AudioFile));
+                var mp3MetaTags = MetaDataReader.GetMetaData(
+                    audioFile: mp3AudioFile,
+                    tryParseMetaFromPath: true,
+                    tryParseMetaFromReadarr: true,
+                    tryParseMetaFromOpenAudible: true,
+                    smallerFileName: false,
+                    libraryRootPath: Path.GetDirectoryName(mp3AudioFile));
 
                 if (!string.IsNullOrEmpty(mp3MetaTags.Author) && !string.IsNullOrEmpty(mp3MetaTags.Title))
                 {

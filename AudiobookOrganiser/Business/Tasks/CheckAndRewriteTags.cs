@@ -1,8 +1,7 @@
-﻿using AudiobookOrganiser.Models;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using static System.Extensions;
 
 namespace AudiobookOrganiser.Business.Tasks
@@ -18,8 +17,13 @@ namespace AudiobookOrganiser.Business.Tasks
                 "*.m4b",
                 SearchOption.AllDirectories);
 
-            foreach (var audioFilePath in m4bAudioFiles)
-                PerformCheckAndRewriteTags(audioFilePath);
+            Parallel.ForEach(
+                m4bAudioFiles,
+                new ParallelOptions { MaxDegreeOfParallelism = 8 },
+                audioFilePath =>
+                {
+                    PerformCheckAndRewriteTags(audioFilePath);
+                });
         }
 
         private static void PerformCheckAndRewriteTags(string audioFilePath)
@@ -28,16 +32,22 @@ namespace AudiobookOrganiser.Business.Tasks
             {
                 try
                 {
-                    if (!Directory.Exists(Program.AudibleCliSyncPath))
-                        Directory.CreateDirectory(Program.AudibleCliSyncPath);
+                    var metaOnlyFromFile = MetaDataReader.GetMetaData(
+                       audioFile: audioFilePath,
+                       tryParseMetaFromPath: false,
+                       tryParseMetaFromReadarr: false,
+                       tryParseMetaFromOpenAudible: false,
+                       smallerFileName: false,
+                       getProperGenre: true);
 
-                    var _libraryExportPath = Path.Combine(Program.AudibleCliSyncPath, Program.LibraryExportName);
-
-                    var audibleLibrary = JsonConvert.DeserializeObject<AudibleLibrary.Property[]>
-                        (File.ReadAllText(_libraryExportPath));
-
-                    var metaOnlyFromFile = MetaDataReader.GetMetaData(audioFilePath, false, false, false, false, null, true);
-                    var metaFromOtherSources = MetaDataReader.GetMetaData(audioFilePath, true, true, true, false, forOverwriting: true, audibleLibrary: audibleLibrary);
+                    var metaFromOtherSources = MetaDataReader.GetMetaData(
+                        audioFile: audioFilePath,
+                        tryParseMetaFromPath: true,
+                        tryParseMetaFromReadarr: true,
+                        tryParseMetaFromOpenAudible: true,
+                        smallerFileName: false,
+                        forOverwriting: true,
+                        audibleLibrary: Program.AudiobookLibrary);
 
                     metaFromOtherSources.ProperGenre = "Audiobook";
 
@@ -74,15 +84,21 @@ namespace AudiobookOrganiser.Business.Tasks
                         hasChanged = true;
                     }
 
-                    if (metaOnlyFromFile.Series != metaFromOtherSources.Series)
-                    {
-                        changedList.Add("Series");
-                        hasChanged = true;
-                    }
-
                     if (metaOnlyFromFile.Overview != metaFromOtherSources.Overview)
                     {
-                        if (metaOnlyFromFile.Overview.Replace(" / ", "\r\n") != metaFromOtherSources.Overview)
+                        if (metaOnlyFromFile.Overview
+                            .Replace(" / ", "")
+                            .Replace("\r", "")
+                            .Replace("\n", "")
+                            .Replace(" ", "")
+
+                            !=
+
+                            metaFromOtherSources.Overview
+                            .Replace(" / ", "")
+                            .Replace("\r", "")
+                            .Replace("\n", "")
+                            .Replace(" ", ""))
                         {
                             changedList.Add("Overview");
                             hasChanged = true;
@@ -125,7 +141,7 @@ namespace AudiobookOrganiser.Business.Tasks
                     if (hasChanged)
                     {
                         Console.Write($"{Path.GetFileName(audioFilePath)}: ({string.Join(", ", changedList)})\n");
-                        MetaDataWriter.WriteMetaData(audioFilePath, metaFromOtherSources);
+                        MetaDataWriter.WriteMetaData(audioFilePath, metaFromOtherSources, iterationSleep: false);
                     }
                 }
                 catch { }

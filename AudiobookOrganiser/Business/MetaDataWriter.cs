@@ -7,7 +7,11 @@ namespace AudiobookOrganiser.Business
 {
     internal class MetaDataWriter
     {
-        internal static void WriteMetaData(string audioPath, AudiobookMetaData metaData, bool useTone = false)
+        internal static void WriteMetaData(
+            string audioPath,
+            AudiobookMetaData metaData,
+            bool useTone = false,
+            bool iterationSleep = true)
         {
             if (!useTone)
             {
@@ -16,7 +20,9 @@ namespace AudiobookOrganiser.Business
                 {
                     try
                     {
-                        Thread.Sleep(3000);
+                        if (iterationSleep)
+                            Thread.Sleep(3000);
+
                         WriteMetaDataActual(audioPath, metaData, useTone);
                         success = true;
                         break;
@@ -44,7 +50,10 @@ namespace AudiobookOrganiser.Business
             }
         }
 
-        private static void WriteMetaDataActual(string audioPath, AudiobookMetaData metaData, bool useTone)
+        private static void WriteMetaDataActual(
+            string audioPath,
+            AudiobookMetaData metaData,
+            bool useTone)
         {
             if (metaData == null)
                 return;
@@ -75,7 +84,6 @@ namespace AudiobookOrganiser.Business
                         if (tagLib.Tag.Composers != null && tagLib.Tag.Composers.Length > 0)
                             for (int i = 0; i < tagLib.Tag.Composers.Length; i++)
                                 tagLib.Tag.Composers[0] = tagLib.Tag.Composers[0].Trim();
-
                     }
 
                     tagLib.Tag.Genres = new string[] { "Audiobook" };

@@ -1,10 +1,10 @@
 ﻿using AudiobookOrganiser.Helpers;
 using AudiobookOrganiser.Helpers.FfMpegWrapper;
 using AudiobookOrganiser.Helpers.FfMpegWrapper.Extensions;
-using AudiobookOrganiser.Models;
-using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using static System.Extensions;
@@ -13,16 +13,9 @@ namespace AudiobookOrganiser.Business.Tasks
 {
     internal class SyncFromAudibleCli
     {
-        private static string _libraryExportPath = string.Empty;
-
         public static void Run()
         {
             ConsoleEx.WriteColouredLine(ConsoleColor.Yellow, "\nSyncing with audible-cli...\n");
-
-            if (!Directory.Exists(Program.AudibleCliSyncPath))
-                Directory.CreateDirectory(Program.AudibleCliSyncPath);
-
-            _libraryExportPath = Path.Combine(Program.AudibleCliSyncPath, Program.LibraryExportName);
 
             try
             {
@@ -33,7 +26,7 @@ namespace AudiobookOrganiser.Business.Tasks
                 return;
             }
 
-            if (!File.Exists(_libraryExportPath))
+            if (!File.Exists(Program.LibraryExportJsonPath))
                 return;
 
             try
@@ -77,13 +70,14 @@ namespace AudiobookOrganiser.Business.Tasks
             ProcessHelper.ExecuteProcessAndReadStdOut(
                 "audible.exe",
                 out string _,
-                $"library export --output \"{_libraryExportPath}\" --format json",
+                $"library export --output \"{Program.LibraryExportJsonPath}\" --format json",
                 throwOnError: true);
         }
 
         private static void DownloadBooksFromAudible()
         {
             ConsoleEx.WriteColouredLine(ConsoleColor.White, "Downloading books...");
+
             var lastLibraryDownloadDate = GetLastLibraryDownloadDate();
             string fromDate = GetLastLibraryDownloadDate() == null
                 ? null
@@ -115,12 +109,10 @@ namespace AudiobookOrganiser.Business.Tasks
 
         private static DateTime? GetLastLibraryDownloadDate()
         {
-            string libraryLastDownloadPath = Path.Combine(Program.AudibleCliSyncPath, Program.LibraryLastDownloadName);
-
-            if (!File.Exists(libraryLastDownloadPath))
+            if (!File.Exists(Program.LibraryLastDownloadTxtPath))
                 return null;
 
-            string fileContents = File.ReadAllText(libraryLastDownloadPath)?
+            string fileContents = File.ReadAllText(Program.LibraryLastDownloadTxtPath)?
                                       .Replace(" ", "")?.Replace("\r", "")?
                                       .Replace("\n", "")?
                                       .Trim();
@@ -145,9 +137,8 @@ namespace AudiobookOrganiser.Business.Tasks
         {
             ConsoleEx.WriteColouredLine(ConsoleColor.White, "Logging last sync date...");
 
-            string libraryLastDownloadPath = Path.Combine(Program.AudibleCliSyncPath, Program.LibraryLastDownloadName);
             File.WriteAllText(
-                libraryLastDownloadPath,
+                Program.LibraryLastDownloadTxtPath,
                 DateTime.Now.ToString("yyyy-MM-dd"));
         }
 
@@ -155,27 +146,23 @@ namespace AudiobookOrganiser.Business.Tasks
         {
             ConsoleEx.WriteColouredLine(ConsoleColor.White, "Converting books to M4b...");
 
-            var audibleLibrary = JsonConvert.DeserializeObject<AudibleLibrary.Property[]>
-                (File.ReadAllText(_libraryExportPath));
-
+            var audibleLibrary = Program.AudiobookLibrary;
             if (audibleLibrary != null &&
                 audibleLibrary != null)
             {
-                string convertedPath = Path.Combine(Program.AudibleCliSyncPath, "Converted");
-
-                if (!Directory.Exists(convertedPath))
-                    Directory.CreateDirectory(convertedPath);
-
                 foreach (var audioFile in Directory.GetFiles(
-                    Program.AudibleCliSyncPath, "*.*", SearchOption.AllDirectories))
+                    Program.AudibleCliSyncPath,
+                    "*.*",
+                    SearchOption.AllDirectories))
                 {
-                    if (Path.GetDirectoryName(audioFile) != convertedPath)
+                    if (Path.GetDirectoryName(audioFile) != Program.ConvertedAudiobooksPath)
                     {
                         if (Path.GetFileName(audioFile) == "audible-library-last-download.txt")
                             return;
                         else if (Path.GetFileName(audioFile) == "audible-library.json")
                             return;
-                        else if (!(Path.GetExtension(audioFile).ToLower() == ".aa" ||
+                        else if (
+                           !(Path.GetExtension(audioFile).ToLower() == ".aa" ||
                             Path.GetExtension(audioFile).ToLower() == ".aax" ||
                             Path.GetExtension(audioFile).ToLower() == ".aaxc"))
                         {
@@ -183,7 +170,9 @@ namespace AudiobookOrganiser.Business.Tasks
                         }
                         else
                         {
-                            string newPath = Path.Combine(convertedPath, Path.GetFileNameWithoutExtension(audioFile) + ".m4b");
+                            string newPath = Path.Combine(
+                                Program.ConvertedAudiobooksPath,
+                                Path.GetFileNameWithoutExtension(audioFile) + ".m4b");
 
                             if (!File.Exists(newPath))
                             {
@@ -201,7 +190,13 @@ namespace AudiobookOrganiser.Business.Tasks
 
                                 ResolveAudibleFileDecryptionCodes(audioFile, ref conversionOptions);
 
-                                var metaData = MetaDataReader.GetMetaData(audioFile, false, true, true, false, null, audibleLibrary: audibleLibrary);
+                                var metaData = MetaDataReader.GetMetaData(
+                                    audioFile: audioFile,
+                                    tryParseMetaFromPath: false,
+                                    tryParseMetaFromReadarr: true,
+                                    tryParseMetaFromOpenAudible: true,
+                                    smallerFileName: false,
+                                    audibleLibrary: audibleLibrary);
 
                                 if (metaData != null)
                                 {
@@ -241,7 +236,10 @@ namespace AudiobookOrganiser.Business.Tasks
             }
         }
 
-        private static void CopyPdf(string originalFilePath, string copyToFilePath, bool copyingToLibraryFolder)
+        private static void CopyPdf(
+            string originalFilePath,
+            string copyToFilePath,
+            bool copyingToLibraryFolder)
         {
             try
             {
@@ -252,25 +250,41 @@ namespace AudiobookOrganiser.Business.Tasks
                 {
                     if (Path.GetFileNameWithoutExtension(originalFilePath).Contains("-AAX_"))
                     {
-                        originalPdfName = Path.GetFileNameWithoutExtension(originalFilePath).Substring(0, Path.GetFileNameWithoutExtension(originalFilePath).IndexOf("-AAX_")) + ".pdf";
-                        copyPdfName = Path.GetFileNameWithoutExtension(copyToFilePath).Substring(0, Path.GetFileNameWithoutExtension(copyToFilePath).IndexOf("-AAX_")) + ".pdf";
+                        originalPdfName = Path.GetFileNameWithoutExtension(originalFilePath)
+                                              .Substring(0, Path.GetFileNameWithoutExtension(originalFilePath)
+                                              .IndexOf("-AAX_")) + ".pdf";
+
+                        copyPdfName = Path.GetFileNameWithoutExtension(copyToFilePath)
+                                          .Substring(0, Path.GetFileNameWithoutExtension(copyToFilePath)
+                                          .IndexOf("-AAX_")) + ".pdf";
                     }
                     else
                     {
-                        originalPdfName = Path.GetFileNameWithoutExtension(originalFilePath).Substring(0, Path.GetFileNameWithoutExtension(originalFilePath).IndexOf("-LC_")) + ".pdf";
-                        copyPdfName = Path.GetFileNameWithoutExtension(copyToFilePath).Substring(0, Path.GetFileNameWithoutExtension(copyToFilePath).IndexOf("-LC_")) + ".pdf";
+                        originalPdfName = Path.GetFileNameWithoutExtension(originalFilePath)
+                                              .Substring(0, Path.GetFileNameWithoutExtension(originalFilePath)
+                                              .IndexOf("-LC_")) + ".pdf";
+
+                        copyPdfName = Path.GetFileNameWithoutExtension(copyToFilePath)
+                                          .Substring(0, Path.GetFileNameWithoutExtension(copyToFilePath)
+                                          .IndexOf("-LC_")) + ".pdf";
                     }
                 }
                 else
                 {
                     if (Path.GetFileNameWithoutExtension(originalFilePath).Contains("-AAX_"))
                     {
-                        originalPdfName = Path.GetFileNameWithoutExtension(originalFilePath).Substring(0, Path.GetFileNameWithoutExtension(originalFilePath).IndexOf("-AAX_")) + ".pdf";
+                        originalPdfName = Path.GetFileNameWithoutExtension(originalFilePath)
+                                              .Substring(0, Path.GetFileNameWithoutExtension(originalFilePath)
+                                              .IndexOf("-AAX_")) + ".pdf";
+
                         copyPdfName = Path.GetFileNameWithoutExtension(copyToFilePath) + ".pdf";
                     }
                     else
                     {
-                        originalPdfName = Path.GetFileNameWithoutExtension(originalFilePath).Substring(0, Path.GetFileNameWithoutExtension(originalFilePath).IndexOf("-LC_")) + ".pdf";
+                        originalPdfName = Path.GetFileNameWithoutExtension(originalFilePath)
+                                              .Substring(0, Path.GetFileNameWithoutExtension(originalFilePath)
+                                              .IndexOf("-LC_")) + ".pdf";
+
                         copyPdfName = Path.GetFileNameWithoutExtension(copyToFilePath) + ".pdf";
                     }
                 }
@@ -312,17 +326,31 @@ namespace AudiobookOrganiser.Business.Tasks
         {
             ConsoleEx.WriteColouredLine(ConsoleColor.White, "Copying to library folder...");
 
-            foreach (var audioFile in Directory.GetFiles(
-                Path.Combine(Program.AudibleCliSyncPath, "Converted"),
-                "*.m4b",
-                SearchOption.AllDirectories))
+            var lockedInModel = LockInAudiobooks.GetLockedInModel();
+            var audioFilesToLockIn = new ConcurrentBag<string>();
+
+            Parallel.ForEach(
+                Directory.GetFiles(
+                    Program.ConvertedAudiobooksPath,
+                    "*.m4b",
+                    SearchOption.AllDirectories),
+                new ParallelOptions { MaxDegreeOfParallelism = 4 },
+                audioFile =>
             {
+                string hash = LockInAudiobooks.ComputeFileHash(audioFile);
+                if (lockedInModel.Any(m => m.Hash == hash))
+                    return;
+
                 try
                 {
-                    var audibleLibrary = JsonConvert.DeserializeObject<AudibleLibrary.Property[]>
-                        (File.ReadAllText(_libraryExportPath));
+                    var metaData = MetaDataReader.GetMetaData(
+                        audioFile: audioFile,
+                        tryParseMetaFromPath: false,
+                        tryParseMetaFromReadarr: true,
+                        tryParseMetaFromOpenAudible: true,
+                        smallerFileName: false,
+                        audibleLibrary: Program.AudiobookLibrary);
 
-                    var metaData = MetaDataReader.GetMetaData(audioFile, false, true, true, false, null, audibleLibrary: audibleLibrary);
                     string audioBookTitle = MetaDataReader.GetAudiobookTitle(audioFile, metaData);
                     string mp3Path = string.Empty;
                     string copyToPath = string.Empty;
@@ -382,10 +410,16 @@ namespace AudiobookOrganiser.Business.Tasks
                         }
 
                         CopyPdf(audioFile, copyToPath, true);
+
+                        audioFilesToLockIn.Add(copyToPath);
                     }
+
+                    audioFilesToLockIn.Add(audioFile);
                 }
                 catch { }
-            }
+            });
+
+            LockInAudiobooks.LockInAudiobookFiles(audioFilesToLockIn.ToList());
         }
     }
 }

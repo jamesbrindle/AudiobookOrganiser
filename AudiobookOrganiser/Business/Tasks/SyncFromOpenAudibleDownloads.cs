@@ -11,11 +11,19 @@ namespace AudiobookOrganiser.Business.Tasks
         {
             ConsoleEx.WriteColouredLine(ConsoleColor.Yellow, "\n\nSyncing from OpenAudibleDownloads...\n\n");
 
-            var m4bAudioFiles = Directory.GetFiles(Program.OpenAudibleDownloadsFolderM4bPath, "*.*", SearchOption.AllDirectories);
+            var m4bAudioFiles = Directory.GetFiles(
+                Program.OpenAudibleDownloadsFolderM4bPath,
+                "*.*",
+                SearchOption.AllDirectories);
+
             foreach (var audioFilePath in m4bAudioFiles)
                 PerformSyncOnM4bFile(audioFilePath);
 
-            var mp3AudioFiles = Directory.GetFiles(Program.OpenAudibleDownloadsFolderMp3Path, "*.*", SearchOption.AllDirectories);
+            var mp3AudioFiles = Directory.GetFiles(
+                Program.OpenAudibleDownloadsFolderMp3Path,
+                "*.*",
+                SearchOption.AllDirectories);
+
             foreach (var audioFilePath in mp3AudioFiles)
                 PerformSyncOnMp3File(audioFilePath);
         }
@@ -26,7 +34,12 @@ namespace AudiobookOrganiser.Business.Tasks
             {
                 try
                 {
-                    var metaData = MetaDataReader.GetMetaData(audioFilePath, false, true, true, false);
+                    var metaData = MetaDataReader.GetMetaData(
+                        audioFile: audioFilePath,
+                        tryParseMetaFromPath: false,
+                        tryParseMetaFromReadarr: true,
+                        tryParseMetaFromOpenAudible: true,
+                        smallerFileName: false);
 
                     if (!string.IsNullOrEmpty(metaData.Author) && !string.IsNullOrEmpty(metaData.Title))
                     {
@@ -56,7 +69,12 @@ namespace AudiobookOrganiser.Business.Tasks
 
                         if (newFilename.Length > 255)
                         {
-                            metaData = MetaDataReader.GetMetaData(audioFilePath, false, true, true, true);
+                            metaData = MetaDataReader.GetMetaData(
+                               audioFile: audioFilePath,
+                               tryParseMetaFromPath: false,
+                               tryParseMetaFromReadarr: true,
+                               tryParseMetaFromOpenAudible: true,
+                               smallerFileName: true);
 
                             newFilename = Path.Combine(
                                 LibraryPathHelper.DetermineLibraryPath(metaData),
@@ -81,16 +99,6 @@ namespace AudiobookOrganiser.Business.Tasks
                                             : " ") +
                                             "(Narrated - " + LibraryPathHelper.GetSingleNarrator(metaData.Narrator) + ")")
                                     + Path.GetExtension(audioFilePath));
-
-                            //if (newFilename.Length > 255)
-                            //{
-                            //    ConsoleEx.WriteColouredLine(
-                            //        ConsoleColor.Red,
-                            //        $"Skipped: {Path.GetFileNameWithoutExtension(Path.GetFileName(audioFilePath))}: " +
-                            //        $"Resulting path too large.");
-
-                            //    return;
-                            //}
                         }
 
                         Console.Out.WriteLine(Path.GetFileNameWithoutExtension(newFilename));
@@ -133,7 +141,12 @@ namespace AudiobookOrganiser.Business.Tasks
             {
                 try
                 {
-                    var metaData = MetaDataReader.GetMetaData(audioFilePath, false, true, true, false);
+                    var metaData = MetaDataReader.GetMetaData(
+                        audioFile: audioFilePath,
+                        tryParseMetaFromPath: false,
+                        tryParseMetaFromReadarr: true,
+                        tryParseMetaFromOpenAudible: true,
+                        smallerFileName: false);
 
                     if (!string.IsNullOrEmpty(metaData.Author) && !string.IsNullOrEmpty(metaData.Title))
                     {
@@ -163,7 +176,12 @@ namespace AudiobookOrganiser.Business.Tasks
 
                         if (newFilename.Length > 255)
                         {
-                            metaData = MetaDataReader.GetMetaData(audioFilePath, false, true, true, true);
+                            metaData = MetaDataReader.GetMetaData(
+                                audioFile: audioFilePath,
+                                tryParseMetaFromPath: false,
+                                tryParseMetaFromReadarr: true,
+                                tryParseMetaFromOpenAudible: true,
+                                smallerFileName: true);
 
                             newFilename = Path.Combine(
                                 LibraryPathHelper.DetermineLibraryPath(metaData),
@@ -188,16 +206,6 @@ namespace AudiobookOrganiser.Business.Tasks
                                             : " ") +
                                             "(Narrated - " + LibraryPathHelper.GetSingleNarrator(metaData.Narrator) + ")")
                                     + Path.GetExtension(audioFilePath));
-
-                            //if (newFilename.Length > 255)
-                            //{
-                            //    ConsoleEx.WriteColouredLine(
-                            //        ConsoleColor.Red,
-                            //        $"Skipped: {Path.GetFileNameWithoutExtension(Path.GetFileName(audioFilePath))}: " +
-                            //        $"Resulting path too large.");
-
-                            //    return;
-                            //}
                         }
 
                         Console.Out.WriteLine(Path.GetFileNameWithoutExtension(newFilename));

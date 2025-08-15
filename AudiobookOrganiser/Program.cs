@@ -1,4 +1,6 @@
 ﻿using AudiobookOrganiser.Business.Tasks;
+using AudiobookOrganiser.Models;
+using Newtonsoft.Json;
 using System;
 using System.Configuration;
 using System.IO;
@@ -22,12 +24,21 @@ namespace AudiobookOrganiser
             if (args.Contains("-audible-sync"))
             {
                 SyncFromAudibleCli.Run();
-                CheckForCorruptedFiles.Run();
                 ConsoleEx.WriteColoured(ConsoleColor.Green, "\n\nDONE!");
             }
             else if (args.Contains("-update-tags-only"))
             {
                 CheckAndRewriteTags.Run();
+                LockInAudiobooks.LockInAll();
+                ConsoleEx.WriteColoured(ConsoleColor.Green, "\n\nDONE!");
+            }
+            else if (args.Contains("-lock-in-only"))
+            {
+                LockInAudiobooks.LockInAll();
+                ConsoleEx.WriteColoured(ConsoleColor.Green, "\n\nDONE!");
+            }
+            else if (args.Contains("-corruption-check-only"))
+            {
                 CheckForCorruptedFiles.Run();
                 ConsoleEx.WriteColoured(ConsoleColor.Green, "\n\nDONE!");
             }
@@ -54,43 +65,87 @@ namespace AudiobookOrganiser
             CleanUpTempFiles();
         }
 
-        internal static string[] LibraryRootPaths { get; set; }
+        internal static string[] LibraryRootPaths { get; }
             = ConfigurationManager.AppSettings["LibraryRootPaths"].Trim().Split(';');
-        internal static string OpenAudibleDownloadsFolderMp3Path { get; set; }
+        internal static string OpenAudibleDownloadsFolderMp3Path { get; }
             = ConfigurationManager.AppSettings["OpenAudibleDownloadsFolderMp3Path"].Trim();
-        internal static string OpenAudibleDownloadsFolderM4bPath { get; set; }
+        internal static string OpenAudibleDownloadsFolderM4bPath { get; }
             = ConfigurationManager.AppSettings["OpenAudibleDownloadsFolderM4bPath"].Trim();
-        internal static string OpenAudibleBookListPath { get; set; }
+        internal static string OpenAudibleBookListPath { get; }
             = ConfigurationManager.AppSettings["OpenAudibleBookListPath"].Trim();
-        internal static bool SyncFromOpenAudibleDownloadsFolder { get; set; }
+        internal static bool SyncFromOpenAudibleDownloadsFolder { get; }
             = ConfigurationManager.AppSettings["SyncFromOpenAudibleDownloadsFolder"].Trim().ToLower().In("yes", "true", "1");
-        internal static string OutputDirectoryName { get; set; }
+        internal static string OutputDirectoryName { get; }
             = ConfigurationManager.AppSettings["OutputDirectoryName"].Trim();
-        internal static string AudibleCliSyncPath { get; set; }
-            = ConfigurationManager.AppSettings["AudibleCliSyncPath"].Trim();
-        internal static string FfMpegPath { get; set; }
+        internal static string FfMpegPath { get; }
             = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "ffmpeg.exe");
-        internal static string FfProbePath { get; set; }
+        internal static string FfProbePath { get; }
             = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "ffprobe.exe");
-        internal static bool LibFDK_AAC_EncodingEnabled { get; set; }
+        internal static bool LibFDK_AAC_EncodingEnabled { get; }
            = ConfigurationManager.AppSettings["LibFDK_AAC_EncodingEnabled"].Trim().ToLower().In("yes", "true", "1");
-        internal static string LibraryExportName { get; set; } = "audible-library.json";
-        internal static string LibraryLastDownloadName { get; set; } = "audible-library-last-download.txt";
+
+        internal static string AudibleCliSyncPath
+        {
+            get
+            {
+                string path = ConfigurationManager.AppSettings["AudibleCliSyncPath"].Trim();
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+
+                return path;
+            }
+        }
+
+        internal static AudibleLibrary.Property[] AudiobookLibrary
+        {
+            get
+            {
+                try
+                {
+                    return JsonConvert.DeserializeObject<AudibleLibrary.Property[]>
+                        (File.ReadAllText(LibraryExportJsonPath));
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+        }
+
+        internal static string ConvertedAudiobooksPath
+        {
+            get
+            {
+                string path = Path.Combine(AudibleCliSyncPath, "Converted");
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+
+                return path;
+            }
+        }
+        internal static string LibraryExportJsonPath { get; } = Path.Combine(AudibleCliSyncPath, "audible-library.json");
+        internal static string LibraryLastDownloadTxtPath { get; } = Path.Combine(Program.AudibleCliSyncPath, "audible-library-last-download.txt");
+        internal static string LockedInAudiobooksJsonPath { get; } = Path.Combine(Program.AudibleCliSyncPath, "locked-in.json");
 
         private static string _tempReadarrDbPath = null;
+
         internal static string ReadarrDbPath
         {
             get
             {
                 try
                 {
-                    if (!string.IsNullOrEmpty(_tempReadarrDbPath) && System.IO.File.Exists(_tempReadarrDbPath))
+                    if (!string.IsNullOrEmpty(_tempReadarrDbPath) && File.Exists(_tempReadarrDbPath))
                         return _tempReadarrDbPath;
 
-                    var dbFiles = Directory.GetFiles(ConfigurationManager.AppSettings["ReadarrAppDataRoute"].Trim(), "*.db", SearchOption.TopDirectoryOnly).ToList();
+                    var dbFiles = Directory.GetFiles(ConfigurationManager.AppSettings["ReadarrAppDataRoute"].Trim(), "*.db", SearchOption.TopDirectoryOnly)
+                                            .ToList();
+
                     dbFiles = dbFiles.OrderByDescending(m => new FileInfo(m).LastWriteTime).ToList();
 
-                    var originalDbFilePath = dbFiles.Where(m => Path.GetFileName(m).ToLower().Contains("readarr")).FirstOrDefault();
+                    var originalDbFilePath = dbFiles.Where(m => Path.GetFileName(m).ToLower().Contains("readarr"))
+                                                    .FirstOrDefault();
+
                     _tempReadarrDbPath = originalDbFilePath;
 
                     string tempDbFileDir = Path.Combine(Path.GetTempPath(), "AudioBookOrganiser");
@@ -126,7 +181,7 @@ namespace AudiobookOrganiser
                 {
                     try
                     {
-                        System.IO.File.Delete(file);
+                        File.Delete(file);
                     }
                     catch { }
                 }
