@@ -148,25 +148,25 @@ namespace AudiobookOrganiser.Business.Tasks
 
             var audibleLibrary = Program.AudiobookLibrary;
             if (audibleLibrary != null &&
-                audibleLibrary != null)
+                audibleLibrary.Count() > 0)
             {
                 foreach (var audioFile in Directory.GetFiles(
                     Program.AudibleCliSyncPath,
                     "*.*",
                     SearchOption.AllDirectories))
-                {
+                {                       
                     if (Path.GetDirectoryName(audioFile) != Program.ConvertedAudiobooksPath)
                     {
                         if (Path.GetFileName(audioFile) == "audible-library-last-download.txt")
-                            return;
+                            continue;
                         else if (Path.GetFileName(audioFile) == "audible-library.json")
-                            return;
+                            continue;
                         else if (
                            !(Path.GetExtension(audioFile).ToLower() == ".aa" ||
-                            Path.GetExtension(audioFile).ToLower() == ".aax" ||
-                            Path.GetExtension(audioFile).ToLower() == ".aaxc"))
+                             Path.GetExtension(audioFile).ToLower() == ".aax" ||
+                             Path.GetExtension(audioFile).ToLower() == ".aaxc"))
                         {
-                            return;
+                            continue;
                         }
                         else
                         {
