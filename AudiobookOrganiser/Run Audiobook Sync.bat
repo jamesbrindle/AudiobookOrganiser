@@ -1,1 +1,2 @@
-"C:\Utilities\AudiobookOrganiser\AudiobookOrganiser.exe" -audible-sync
+"AudiobookOrganiser.exe" -update-tags-only
+"AudiobookOrganiser.exe" -audible-sync

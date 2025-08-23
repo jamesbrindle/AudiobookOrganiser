@@ -29,7 +29,6 @@ namespace AudiobookOrganiser
             else if (args.Contains("-update-tags-only"))
             {
                 CheckAndRewriteTags.Run();
-                LockInAudiobooks.LockInAll();
                 ConsoleEx.WriteColoured(ConsoleColor.Green, "\n\nDONE!");
             }
             else if (args.Contains("-lock-in-only"))
