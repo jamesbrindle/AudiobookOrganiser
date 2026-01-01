@@ -25,7 +25,6 @@ namespace AudiobookOrganiser.Business.Tasks
                 var mp3MetaTags = MetaDataReader.GetMetaData(
                     audioFile: mp3AudioFile,
                     tryParseMetaFromPath: true,
-                    tryParseMetaFromReadarr: true,
                     tryParseMetaFromOpenAudible: true,
                     smallerFileName: false,
                     libraryRootPath: Path.GetDirectoryName(mp3AudioFile));

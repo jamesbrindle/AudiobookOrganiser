@@ -2,7 +2,6 @@
 using AudiobookOrganiser.Models;
 using Newtonsoft.Json;
 using System;
-using System.Data.SQLite;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -16,7 +15,6 @@ namespace AudiobookOrganiser.Business
         public static AudiobookMetaData GetMetaData(
             string audioFile,
             bool tryParseMetaFromPath,
-            bool tryParseMetaFromReadarr,
             bool tryParseMetaFromOpenAudible,
             bool smallerFileName,
             string libraryRootPath = null,
@@ -36,15 +34,6 @@ namespace AudiobookOrganiser.Business
                 try
                 {
                     metaData = GetMetaFromAudibleFile(metaData, audibleLibrary);
-                }
-                catch { }
-            }
-
-            if (tryParseMetaFromReadarr)
-            {
-                try
-                {
-                    metaData = GetMetaFromReadarr(metaData, audioFile);
                 }
                 catch { }
             }
@@ -166,7 +155,7 @@ namespace AudiobookOrganiser.Business
 
                     if ((Path.GetDirectoryName(audioFilePath) + "\\" + newFilename).Length > 255)
                     {
-                        metaData = GetMetaData(audioFilePath, true, true, true, true, null);
+                        metaData = GetMetaData(audioFilePath, true, true, true, null);
 
                         newFilename =
                             (string.IsNullOrEmpty(metaData.Author) ? "" : (metaData.Author.Split(',')?[0].Trim() + "\\")) +
@@ -908,98 +897,6 @@ namespace AudiobookOrganiser.Business
 
                 if (string.IsNullOrEmpty(metaData.Genre) && !string.IsNullOrEmpty(book.genres))
                     metaData.Genre = book.genres;
-            }
-
-            return metaData;
-        }
-
-        private static AudiobookMetaData GetMetaFromReadarr(
-            AudiobookMetaData metaData,
-            string audioFilePath)
-        {
-            using (var connection = new SQLiteConnection($"Data Source=\"{Program.ReadarrDbPath}\""))
-            {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-                command.CommandText =
-                @"
-                    SELECT
-                        b.ReleaseDate,
-	                    b.Genres,
-	                    e.Isbn13,
-	                    e.Asin,
-	                    e.Title,
-	                    e.Overview,
-	                    e.Format,
-	                    e.Images,
-	                    bf.Path,
-	                   	am.Name AS Author,
-	                    am.NameLastFirst AS AuthorLastFirst,
-	                    s.Title AS Series,
-	                    sbl.Position As SeriesPart
-                    FROM Books b
-	                    LEFT JOIN Editions e
-		                    ON e.BookId = b.Id
-	                    LEFT JOIN BookFiles bf
-		                    ON bf.EditionId = e.Id
-	                    LEFT JOIN SeriesBookLink sbl
-		                    ON sbl.BookId = b.Id
-	                    LEFT JOIN Series s
-		                    ON s.Id = sbl.SeriesId
-	                    LEFT JOIN AuthorMetadata am
-		                    ON am.Id = b.AuthorMetadataId
-                    WHERE (IsEbook = 0
-                    AND     Format <> 'Paperback'
-                    AND     b.Title LIKE '%" + metaData.Title + @"%'
-                    AND   (am.Name LIKE '%" + metaData.Author + @"%') 
-	                    OR am.NameLastFirst LIKE '%" + metaData.Author + @"%')
-                    OR bf.Path = '" + audioFilePath + @"
-                    ORDER BY bf.Path DESC
-                    LIMIT 1'
-                ";
-
-                using (var reader = command.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        if (reader.HasRows)
-                        {
-                            if (string.IsNullOrEmpty(metaData.Author))
-                                metaData.Author = reader["Author"].ToString()?.Trim();
-
-                            if (string.IsNullOrEmpty(metaData.Title))
-                                metaData.Title = reader["Title"].ToString();
-
-                            if (!string.IsNullOrEmpty(reader["Overview"].ToString()))
-                                metaData.Overview = FormatOverview(reader["Overview"].ToString());
-
-                            if (string.IsNullOrEmpty(metaData.Genre))
-                                metaData.Genre = FormatJsonGenres(reader["Genres"].ToString())?.Trim();
-
-                            if (metaData.Genre != null && metaData.Genre == "Audiobook")
-                                metaData.Genre = string.Empty;
-
-                            if (string.IsNullOrEmpty(metaData.Series))
-                                metaData.Series = reader["Series"].ToString()?.Trim();
-
-                            if (string.IsNullOrEmpty(metaData.SeriesPart))
-                                metaData.SeriesPart = reader["SeriesPart"].ToString()?.Trim();
-
-                            if (string.IsNullOrEmpty(metaData.Year))
-                            {
-                                try
-                                {
-                                    metaData.Year = DateTime.Parse(reader["ReleaseDate"].ToString()).ToString("yyyy");
-                                }
-                                catch { }
-                            }
-
-                            if (string.IsNullOrEmpty(metaData.Asin))
-                                metaData.Asin = reader["Asin"].ToString()?.Trim();
-                        }
-                    }
-                }
             }
 
             return metaData;

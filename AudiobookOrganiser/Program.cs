@@ -126,52 +126,6 @@ namespace AudiobookOrganiser
         internal static string LibraryLastDownloadTxtPath { get; } = Path.Combine(Program.AudibleCliSyncPath, "audible-library-last-download.txt");
         internal static string LockedInAudiobooksJsonPath { get; } = Path.Combine(Program.AudibleCliSyncPath, "locked-in.json");
 
-        private static string _tempReadarrDbPath = null;
-
-        internal static string ReadarrDbPath
-        {
-            get
-            {
-                try
-                {
-                    if (!string.IsNullOrEmpty(_tempReadarrDbPath) && File.Exists(_tempReadarrDbPath))
-                        return _tempReadarrDbPath;
-
-                    var dbFiles = Directory.GetFiles(ConfigurationManager.AppSettings["ReadarrAppDataRoute"].Trim(), "*.db", SearchOption.TopDirectoryOnly)
-                                            .ToList();
-
-                    dbFiles = dbFiles.OrderByDescending(m => new FileInfo(m).LastWriteTime).ToList();
-
-                    var originalDbFilePath = dbFiles.Where(m => Path.GetFileName(m).ToLower().Contains("readarr"))
-                                                    .FirstOrDefault();
-
-                    _tempReadarrDbPath = originalDbFilePath;
-
-                    string tempDbFileDir = Path.Combine(Path.GetTempPath(), "AudioBookOrganiser");
-
-                    if (!Directory.Exists(tempDbFileDir))
-                        Directory.CreateDirectory(tempDbFileDir);
-
-                    string tempDbFilePath = Path.Combine(tempDbFileDir, Guid.NewGuid().ToString() + ".db");
-
-                    Helpers.DbHelper.BackupDatabase(originalDbFilePath, tempDbFilePath);
-
-                    _tempReadarrDbPath = tempDbFilePath;
-                }
-                catch
-                { }
-
-                if (string.IsNullOrEmpty(_tempReadarrDbPath))
-                    _tempReadarrDbPath = @"C:\ProgramData\Readarr\readarr.db";
-
-                return _tempReadarrDbPath;
-            }
-            set
-            {
-                _tempReadarrDbPath = value;
-            }
-        }
-
         private static void CleanUpTempFiles()
         {
             try

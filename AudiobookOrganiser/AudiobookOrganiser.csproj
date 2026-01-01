@@ -111,7 +111,6 @@
     <Compile Include="Business\Tasks\ConvertExistingMp3ToM4b.cs" />
     <Compile Include="Business\Tasks\LockInAudiobooks.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Helpers\DbHelper.cs" />
     <Compile Include="Helpers\FfMpegWrapper\CombineOptions.cs" />
     <Compile Include="Helpers\FfMpegWrapper\ConcatenationOptions.cs" />
     <Compile Include="Helpers\FfMpegWrapper\ConversionOptions.cs" />

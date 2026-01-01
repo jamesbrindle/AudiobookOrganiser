@@ -37,7 +37,6 @@ namespace AudiobookOrganiser.Business.Tasks
                     var metaData = MetaDataReader.GetMetaData(
                         audioFile: audioFilePath,
                         tryParseMetaFromPath: false,
-                        tryParseMetaFromReadarr: true,
                         tryParseMetaFromOpenAudible: true,
                         smallerFileName: false);
 
@@ -72,7 +71,6 @@ namespace AudiobookOrganiser.Business.Tasks
                             metaData = MetaDataReader.GetMetaData(
                                audioFile: audioFilePath,
                                tryParseMetaFromPath: false,
-                               tryParseMetaFromReadarr: true,
                                tryParseMetaFromOpenAudible: true,
                                smallerFileName: true);
 
@@ -144,7 +142,6 @@ namespace AudiobookOrganiser.Business.Tasks
                     var metaData = MetaDataReader.GetMetaData(
                         audioFile: audioFilePath,
                         tryParseMetaFromPath: false,
-                        tryParseMetaFromReadarr: true,
                         tryParseMetaFromOpenAudible: true,
                         smallerFileName: false);
 
@@ -179,7 +176,6 @@ namespace AudiobookOrganiser.Business.Tasks
                             metaData = MetaDataReader.GetMetaData(
                                 audioFile: audioFilePath,
                                 tryParseMetaFromPath: false,
-                                tryParseMetaFromReadarr: true,
                                 tryParseMetaFromOpenAudible: true,
                                 smallerFileName: true);
 

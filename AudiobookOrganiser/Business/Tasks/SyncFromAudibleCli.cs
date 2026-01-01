@@ -154,7 +154,7 @@ namespace AudiobookOrganiser.Business.Tasks
                     Program.AudibleCliSyncPath,
                     "*.*",
                     SearchOption.AllDirectories))
-                {                       
+                {
                     if (Path.GetDirectoryName(audioFile) != Program.ConvertedAudiobooksPath)
                     {
                         if (Path.GetFileName(audioFile) == "audible-library-last-download.txt")
@@ -193,7 +193,6 @@ namespace AudiobookOrganiser.Business.Tasks
                                 var metaData = MetaDataReader.GetMetaData(
                                     audioFile: audioFile,
                                     tryParseMetaFromPath: false,
-                                    tryParseMetaFromReadarr: true,
                                     tryParseMetaFromOpenAudible: true,
                                     smallerFileName: false,
                                     audibleLibrary: audibleLibrary);
@@ -346,7 +345,6 @@ namespace AudiobookOrganiser.Business.Tasks
                     var metaData = MetaDataReader.GetMetaData(
                         audioFile: audioFile,
                         tryParseMetaFromPath: false,
-                        tryParseMetaFromReadarr: true,
                         tryParseMetaFromOpenAudible: true,
                         smallerFileName: false,
                         audibleLibrary: Program.AudiobookLibrary);

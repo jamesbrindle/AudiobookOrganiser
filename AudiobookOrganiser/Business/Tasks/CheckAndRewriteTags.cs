@@ -17,9 +17,12 @@ namespace AudiobookOrganiser.Business.Tasks
                 "*.m4b",
                 SearchOption.AllDirectories);
 
+            //foreach (var audioFilePath in m4bAudioFiles)
+            //    PerformCheckAndRewriteTags(audioFilePath);
+
             Parallel.ForEach(
                 m4bAudioFiles,
-                new ParallelOptions { MaxDegreeOfParallelism = 8 },
+                new ParallelOptions { MaxDegreeOfParallelism = 4 },
                 audioFilePath =>
                 {
                     PerformCheckAndRewriteTags(audioFilePath);
@@ -35,7 +38,6 @@ namespace AudiobookOrganiser.Business.Tasks
                     var metaOnlyFromFile = MetaDataReader.GetMetaData(
                        audioFile: audioFilePath,
                        tryParseMetaFromPath: false,
-                       tryParseMetaFromReadarr: false,
                        tryParseMetaFromOpenAudible: false,
                        smallerFileName: false,
                        getProperGenre: true);
@@ -43,7 +45,6 @@ namespace AudiobookOrganiser.Business.Tasks
                     var metaFromOtherSources = MetaDataReader.GetMetaData(
                         audioFile: audioFilePath,
                         tryParseMetaFromPath: true,
-                        tryParseMetaFromReadarr: true,
                         tryParseMetaFromOpenAudible: true,
                         smallerFileName: false,
                         forOverwriting: true,

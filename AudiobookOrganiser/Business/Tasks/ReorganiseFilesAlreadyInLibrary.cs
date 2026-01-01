@@ -27,7 +27,6 @@ namespace AudiobookOrganiser.Business.Tasks
                         var metaData = MetaDataReader.GetMetaData(
                             audioFile: audioFilePath,
                             tryParseMetaFromPath: true,
-                            tryParseMetaFromReadarr: true,
                             tryParseMetaFromOpenAudible: true,
                             smallerFileName: false,
                             libraryRootPath: libraryRootPath,
@@ -64,7 +63,6 @@ namespace AudiobookOrganiser.Business.Tasks
                                 metaData = MetaDataReader.GetMetaData(
                                     audioFile: audioFilePath,
                                     tryParseMetaFromPath: true,
-                                    tryParseMetaFromReadarr: true,
                                     tryParseMetaFromOpenAudible: true,
                                     smallerFileName: false,
                                     libraryRootPath: libraryRootPath,

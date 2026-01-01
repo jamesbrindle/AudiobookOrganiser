@@ -37,13 +37,10 @@ Iterate through a directory of audiobook files and move and rename them into a p
 
 It ideally needs the meta data to be present within the file, in order to properly move and rename them according the naming convention. It will attempt 3 different methods to identify meta data fields:
 
-1. It will see if you are using [Reader](https://readarr.com/) which holds a database of your books and their file paths... So it can lookup the author, series, title etc.
-**Readarr must be installed.**
-
-2. It will use a books.json file in your [OpenAudible](https://openaudible.org/) data folder if you have one, which will contain the meta data.
+1. It will use a books.json file in your [OpenAudible](https://openaudible.org/) data folder if you have one, which will contain the meta data.
 **OpenAudible must be installed.**
 
-3. If using the audible-sync arugument, to download and organise from Audible (using [audible-cli](https://github.com/mkb79/audible-cli)) when executing the 'download all books' command, it can reference from the library.json file for the meta data.
+2. If using the audible-sync arugument, to download and organise from Audible (using [audible-cli](https://github.com/mkb79/audible-cli)) when executing the 'download all books' command, it can reference from the library.json file for the meta data.
 **audible-cli must be installed and Activated**
 
 ### More About Audible-Cli
